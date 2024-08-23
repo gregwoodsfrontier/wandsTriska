@@ -11,14 +11,9 @@
 // const {tile, vec2, hsl} = LittleJS;
 
 import {
-    mainCanvasSize,
-    engineInit,
-    setShowSplashScreen,
-    Sound,
-    Medal,
-    medalsInit,
-    ParticleEmitter,
-    tile,
+    mainCanvasSize, engineInit, setShowSplashScreen,
+    Sound, Medal, medalsInit,
+    ParticleEmitter, tile,
     vec2,
     hsl,
     initTileCollision,
@@ -39,6 +34,69 @@ import {
     drawTile,
     drawTextScreen
 } from 'littlejsengine'
+
+import { createWorld, addEntity, addComponent, query, World } from 'bitecs';
+
+// Define components
+// Components can be any storage you want, here it is an SoA
+const Position = {
+	x: [] as number[],
+	y: [] as number[],
+};
+
+const Mass = {
+	value: [] as number[],
+};
+
+// Create a world
+const world = createWorld();
+
+// Add entities to the world
+const entityA = addEntity(world);
+const entityB = addEntity(world);
+
+// Add components to entities
+// Entity A gets a shape of [Position, Mass]
+addComponent(world, Position, entityA);
+addComponent(world, Mass, entityA);
+
+// Entity B gets a shape of [Position]
+addComponent(world, Position, entityB);
+
+// Set the initial values for Entity A's Position and Mass components
+Position.x[entityA] = 400;
+Position.y[entityA] = 200;
+Mass.value[entityA] = 1;
+
+// Set the initial values for Entity B's Position component
+Position.x[entityB] = 600;
+Position.y[entityB] = 300;
+
+// Define a system that moves entities with a Position component
+const moveBody = (world: World) => {
+	const entities = query(world, [Position]); // Returns [entityA, entityB]
+
+	for (const entity of entities) {
+		Position.x[entity] += 1;
+		Position.y[entity] += 1;
+	}
+};
+
+// Define a system that applies gravity to entities with Position and Mass components
+const applyGravity = (world: World) => {
+	const entities = query(world, [Position, Mass]); // Returns [entityA]
+	const gravity = 9.81;
+
+	for (const entity of entities) {
+		Position.y[entity] -= gravity * Mass.value[entity];
+	}
+};
+
+// Run systems in a loop
+const mainLoop = () => {
+	moveBody(world);
+	applyGravity(world);
+};
 
 // show the LittleJS splash screen
 setShowSplashScreen(true);
@@ -131,6 +189,8 @@ function gameUpdate()
     // move particles to mouse location if on screen
     if (mousePosScreen.x)
         particleEmitter.pos = mousePos;
+
+    // mainLoop()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -153,7 +213,7 @@ function gameRender()
 function gameRenderPost()
 {
     // draw to overlay canvas for hud rendering
-    drawTextScreen('LittleJS with TypeScript', vec2(mainCanvasSize.x/2, 80), 80);
+    drawTextScreen('position x of A: '+ Position.x[entityA] , vec2(mainCanvasSize.x/2, 80), 80);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
