@@ -1,15 +1,3 @@
-/*
-    Little JS TypeScript Demo
-    - A simple starter project
-    - Shows how to use LittleJS with TypeScript
-*/
-
-'use strict';
-
-// import module
-// import * as LittleJS from 'littlejsengine';
-// const {tile, vec2, hsl} = LittleJS;
-
 import {
     mainCanvasSize, engineInit, setShowSplashScreen,
     Sound, Medal, medalsInit,
@@ -32,10 +20,22 @@ import {
     mousePosScreen,
     drawRect,
     drawTile,
-    drawTextScreen
+    drawTextScreen,
+    EngineObject,
+    engineObjectsDestroy,
+    Vector2,
+    overlayContext,
+    overlayCanvas
 } from 'littlejsengine'
 
 import { createWorld, addEntity, addComponent, query, World } from 'bitecs';
+
+async function getTileMapData(link: string) {
+    const response = await fetch(link);
+    const data = await response.json();
+
+    return data;
+}
 
 // Define components
 // Components can be any storage you want, here it is an SoA
@@ -44,8 +44,8 @@ const Position = {
 	y: [] as number[],
 };
 
-const Mass = {
-	value: [] as number[],
+const EngineObjectComp = {
+	value: [] as EngineObject[],
 };
 
 // Create a world
@@ -58,7 +58,6 @@ const entityB = addEntity(world);
 // Add components to entities
 // Entity A gets a shape of [Position, Mass]
 addComponent(world, Position, entityA);
-addComponent(world, Mass, entityA);
 
 // Entity B gets a shape of [Position]
 addComponent(world, Position, entityB);
@@ -66,7 +65,6 @@ addComponent(world, Position, entityB);
 // Set the initial values for Entity A's Position and Mass components
 Position.x[entityA] = 400;
 Position.y[entityA] = 200;
-Mass.value[entityA] = 1;
 
 // Set the initial values for Entity B's Position component
 Position.x[entityB] = 600;
@@ -82,20 +80,9 @@ const moveBody = (world: World) => {
 	}
 };
 
-// Define a system that applies gravity to entities with Position and Mass components
-const applyGravity = (world: World) => {
-	const entities = query(world, [Position, Mass]); // Returns [entityA]
-	const gravity = 9.81;
-
-	for (const entity of entities) {
-		Position.y[entity] -= gravity * Mass.value[entity];
-	}
-};
-
 // Run systems in a loop
 const mainLoop = () => {
 	moveBody(world);
-	applyGravity(world);
 };
 
 // show the LittleJS splash screen
@@ -111,44 +98,96 @@ medalsInit('Hello World');
 // game variables
 let particleEmitter: ParticleEmitter;
 
+let levelSize: Vector2
+
+function loadLevel() {
+
+    const tileData = []
+    const tileLay = [] as TileLayer[]
+
+    getTileMapData("/public/gameLevelData.json").then((data) => {
+        const tm = data
+        levelSize = vec2(tm.width, tm.height)
+        initTileCollision(levelSize)
+        // engineObjectsDestroy()
+
+        if(tm.layers) {
+            const layerCount = tm.layers.length
+            for(let i = 0; i < layerCount; i++) {
+                switch (tm.layers[i].name){
+                    case "foreground": 
+                        const layerData = tm.layers[i].data
+                        tileLay[i] = new TileLayer();
+                        tileData[i] = []
+
+                        for(let x = levelSize.x; x--;) {
+                            for(let y = levelSize.y; y--;) {
+                                const pos = vec2(x,levelSize.y-1-y);
+                                const tile = layerData[y*levelSize.x + x];
+
+                                if(tile < 1) continue
+
+                                let direction = 0;
+                                let mirror = false;
+
+                                const data = new TileLayerData(tile - 1, direction, mirror);
+                                tileLay[i].setData(pos, data);
+                            }
+                        }
+
+                        tileLay[i].redraw()
+                        break
+        
+                    case "background":
+                        break
+                    
+                    case "enemy":
+                        break
+                }
+            }
+        }
+    })
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
-    // create tile collision and visible tile layer
-    const tileCollisionSize = vec2(32, 16);
-    initTileCollision(tileCollisionSize);
-    const pos = vec2();
-    const tileLayer = new TileLayer(pos, tileCollisionSize);
+    
+    // // create tile collision and visible tile layer
+    // const tileCollisionSize = vec2(32, 16);
+    // initTileCollision(tileCollisionSize);
+    // const pos = vec2();
+    // const tileLayer = new TileLayer(pos, tileCollisionSize);
 
-    // get level data from the tiles image
-    // const mainContext = mainContext;
-    const tileImage = textureInfos[0].image;
-    mainContext.drawImage(tileImage, 0, 0);
-    const imageData = mainContext.getImageData(0,0,tileImage.width,tileImage.height).data;
-    for (pos.x = tileCollisionSize.x; pos.x--;)
-    for (pos.y = tileCollisionSize.y; pos.y--;)
-    {
-        // check if this pixel is set
-        const i = pos.x + tileImage.width*(15 + tileCollisionSize.y - pos.y);
-        if (!imageData[4*i])
-            continue;
+    // // get level data from the tiles image
+    // // const mainContext = mainContext;
+    // const tileImage = textureInfos[0].image;
+    // mainContext.drawImage(tileImage, 0, 0);
+    // const imageData = mainContext.getImageData(0,0,tileImage.width,tileImage.height).data;
+    // for (pos.x = tileCollisionSize.x; pos.x--;)
+    // for (pos.y = tileCollisionSize.y; pos.y--;)
+    // {
+    //     // check if this pixel is set
+    //     const i = pos.x + tileImage.width*(15 + tileCollisionSize.y - pos.y);
+    //     if (!imageData[4*i])
+    //         continue;
         
-        // set tile data
-        const tileIndex = 1;
-        const direction = randInt(4)
-        const mirror = !randInt(2);
-        const color = randColor();
-        const data = new TileLayerData(tileIndex, direction, mirror, color);
-        tileLayer.setData(pos, data);
-        setTileCollisionData(pos, 1);
-    }
+    //     // set tile data
+    //     const tileIndex = 1;
+    //     const direction = randInt(4)
+    //     const mirror = !randInt(2);
+    //     const color = randColor();
+    //     const data = new TileLayerData(tileIndex, direction, mirror, color);
+    //     tileLayer.setData(pos, data);
+    //     setTileCollisionData(pos, 1);
+    // }
 
-    // draw tile layer with new data
-    tileLayer.redraw();
+    // // draw tile layer with new data
+    // tileLayer.redraw();
 
-    // move camera to center of collision
-    setCameraPos(tileCollisionSize.scale(.5));
-    setCameraScale(48);
+    // // move camera to center of collision
+    setCameraPos(vec2(15, 10));
+    setCameraScale(24);
 
     // enable gravity
     setGravity(-.01);
@@ -157,7 +196,7 @@ function gameInit()
     particleEmitter = new ParticleEmitter(
         vec2(16,9), 0,              // emitPos, emitAngle
         1, 0, 500, Math.PI,         // emitSize, emitTime, emitRate, emiteCone
-        tile(0, 16),                // tileIndex, tileSize
+        tile(14, 16),               // tileIndex, tileSize
         hsl(1,1,1),   hsl(0,0,0),   // colorStartA, colorStartB
         hsl(0,0,0,0), hsl(0,0,0,0), // colorEndA, colorEndB
         2, .2, .2, .1, .05,   // time, sizeStart, sizeEnd, speed, angleSpeed
@@ -166,6 +205,10 @@ function gameInit()
     );
     particleEmitter.elasticity = .3; // bounce when it collides
     particleEmitter.trailScale = 2;  // stretch in direction of motion
+
+    loadLevel()
+
+    console.log(particleEmitter)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -181,9 +224,6 @@ function gameUpdate()
         particleEmitter.colorStartB = randColor();
         particleEmitter.colorEndA = particleEmitter.colorStartA.scale(1,0);
         particleEmitter.colorEndB = particleEmitter.colorStartB.scale(1,0);
-
-        // unlock medals
-        medal_example.unlock();
     }
 
     // move particles to mouse location if on screen
@@ -205,15 +245,25 @@ function gameRender()
     // draw a grey square in the background without using webgl
     drawRect(vec2(16,8), vec2(20,14), hsl(0,0,.6), 0, false);
     
-    // draw the logo as a tile
-    drawTile(vec2(21,5), vec2(4.5), tile(3,128));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameRenderPost()
 {
     // draw to overlay canvas for hud rendering
-    drawTextScreen('position x of A: '+ Position.x[entityA] , vec2(mainCanvasSize.x/2, 80), 80);
+    const drawText = (text: string, x: number, y: number, size=40) =>
+        {
+            overlayContext.textAlign = 'center';
+            overlayContext.textBaseline = 'top';
+            overlayContext.font = size + 'px arial';
+            overlayContext.fillStyle = '#fff';
+            overlayContext.lineWidth = 3;
+            overlayContext.strokeText(text, x, y);
+            overlayContext.fillText(text, x, y);
+        }
+        drawText('Score: 0' ,   overlayCanvas.width*1/4, 20);
+        drawText('Deaths: 0', overlayCanvas.width*3/4, 20);
+    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
