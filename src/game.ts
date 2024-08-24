@@ -25,7 +25,8 @@ import {
     engineObjectsDestroy,
     Vector2,
     overlayContext,
-    overlayCanvas
+    overlayCanvas,
+    tileCollisionSize
 } from 'littlejsengine'
 
 import { createWorld, addEntity, addComponent, query, World } from 'bitecs';
@@ -92,20 +93,26 @@ setShowSplashScreen(true);
 const sound_click = new Sound([1,.5]);
 
 // medals
-const medal_example = new Medal(0, 'Example Medal', 'Welcome to LittleJS!');
-medalsInit('Hello World');
 
 // game variables
 let particleEmitter: ParticleEmitter;
 
 let levelSize: Vector2
 
+const tileData = [] as number[][]
+const tileLay = [] as TileLayer[]
+
+const setTileData = (pos: Vector2, layer: number, data: number)=>
+    pos.arrayCheck(tileCollisionSize) && (tileData[layer][(pos.y|0)*tileCollisionSize.x+pos.x|0] = data);
+const getTileData = (pos: Vector2, layer: number)=>
+    pos.arrayCheck(tileCollisionSize) ? tileData[layer][(pos.y|0)*tileCollisionSize.x+pos.x|0]: 0;
+
+
 function loadLevel() {
 
-    const tileData = []
-    const tileLay = [] as TileLayer[]
+    
 
-    getTileMapData("/public/gameLevelData.json").then((data) => {
+    getTileMapData("/gameLevelData.json").then((data) => {
         const tm = data
         levelSize = vec2(tm.width, tm.height)
         initTileCollision(levelSize)
@@ -117,23 +124,34 @@ function loadLevel() {
                 switch (tm.layers[i].name){
                     case "foreground": 
                         const layerData = tm.layers[i].data
-                        tileLay[i] = new TileLayer();
+                        tileLay[i] = new TileLayer(vec2(), levelSize, tile(0,16,));
                         tileData[i] = []
 
                         for(let x = levelSize.x; x--;) {
                             for(let y = levelSize.y; y--;) {
                                 const pos = vec2(x,levelSize.y-1-y);
                                 const tile = layerData[y*levelSize.x + x];
+                                let data
 
-                                if(tile < 1) continue
+                                // set the tile data
+                                setTileData(pos, i, tile);
 
                                 let direction = 0;
                                 let mirror = false;
 
-                                const data = new TileLayerData(tile - 1, direction, mirror);
+                                if(tile < 1) {
+                                    data = new TileLayerData(0, direction, mirror);
+                                } else {
+                                    data = new TileLayerData(tile - 1, direction, mirror);
+                                }
+                                
                                 tileLay[i].setData(pos, data);
                             }
                         }
+
+                        console.table(tileData)
+                        console.log(tileData[1].length)
+                        console.table(tileLay)
 
                         tileLay[i].redraw()
                         break
