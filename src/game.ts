@@ -1,15 +1,12 @@
 import {
-    mainCanvasSize, engineInit, setShowSplashScreen,
-    Sound, Medal, medalsInit,
+    engineInit, setShowSplashScreen,
+    Sound, 
     ParticleEmitter, tile,
     vec2,
     hsl,
     initTileCollision,
     TileLayer,
     TileLayerData,
-    mainContext,
-    textureInfos,
-    randInt,
     randColor,
     setTileCollisionData,
     setCameraPos,
@@ -19,17 +16,14 @@ import {
     mousePos,
     mousePosScreen,
     drawRect,
-    drawTile,
-    drawTextScreen,
-    EngineObject,
-    engineObjectsDestroy,
     Vector2,
     overlayContext,
     overlayCanvas,
-    tileCollisionSize
-} from 'littlejsengine'
+    tileCollisionSize} from 'littlejsengine'
 
-import { createWorld, addEntity, addComponent, query, World } from 'bitecs';
+import { createWorld, query, World } from 'bitecs';
+import { EngineObjectsComp} from './components';
+import { Player } from './player';
 
 async function getTileMapData(link: string) {
     const response = await fetch(link);
@@ -38,53 +32,10 @@ async function getTileMapData(link: string) {
     return data;
 }
 
-// Define components
-// Components can be any storage you want, here it is an SoA
-const Position = {
-	x: [] as number[],
-	y: [] as number[],
-};
-
-const EngineObjectComp = {
-	value: [] as EngineObject[],
-};
 
 // Create a world
 const world = createWorld();
 
-// Add entities to the world
-const entityA = addEntity(world);
-const entityB = addEntity(world);
-
-// Add components to entities
-// Entity A gets a shape of [Position, Mass]
-addComponent(world, Position, entityA);
-
-// Entity B gets a shape of [Position]
-addComponent(world, Position, entityB);
-
-// Set the initial values for Entity A's Position and Mass components
-Position.x[entityA] = 400;
-Position.y[entityA] = 200;
-
-// Set the initial values for Entity B's Position component
-Position.x[entityB] = 600;
-Position.y[entityB] = 300;
-
-// Define a system that moves entities with a Position component
-const moveBody = (world: World) => {
-	const entities = query(world, [Position]); // Returns [entityA, entityB]
-
-	for (const entity of entities) {
-		Position.x[entity] += 1;
-		Position.y[entity] += 1;
-	}
-};
-
-// Run systems in a loop
-const mainLoop = () => {
-	moveBody(world);
-};
 
 // show the LittleJS splash screen
 setShowSplashScreen(true);
@@ -104,14 +55,33 @@ const tileLay = [] as TileLayer[]
 
 const setTileData = (pos: Vector2, layer: number, data: number)=>
     pos.arrayCheck(tileCollisionSize) && (tileData[layer][(pos.y|0)*tileCollisionSize.x+pos.x|0] = data);
+
 const getTileData = (pos: Vector2, layer: number)=>
     pos.arrayCheck(tileCollisionSize) ? tileData[layer][(pos.y|0)*tileCollisionSize.x+pos.x|0]: 0;
 
+function createPlayer (_pos: Vector2) {
+
+    const player = new Player(_pos, vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player), world)
+
+    return player
+}
+
+enum TILETYPE {
+    break = 2,
+    solid = 3,
+    ladder = 4
+}
+
+enum TILEMAP_LOOKUP {
+    player = 9,
+    demon = 10,
+    blob = 11,
+    tri = 12,
+    spike = 13,
+    fireball = 14
+}
 
 function loadLevel() {
-
-    
-
     getTileMapData("/gameLevelData.json").then((data) => {
         const tm = data
         levelSize = vec2(tm.width, tm.height)
@@ -130,28 +100,31 @@ function loadLevel() {
                         for(let x = levelSize.x; x--;) {
                             for(let y = levelSize.y; y--;) {
                                 const pos = vec2(x,levelSize.y-1-y);
-                                const tile = layerData[y*levelSize.x + x];
+                                const tileNum = layerData[y*levelSize.x + x];
+
+                                if(tileNum == TILEMAP_LOOKUP.player) {
+                                    createPlayer(pos.add(vec2(0, 5)))
+                                    console.log("player tile")
+                                    continue
+                                }
+
                                 let data
 
-                                // set the tile data
-                                setTileData(pos, i, tile);
-
-                                let direction = 0;
-                                let mirror = false;
-
-                                if(tile < 1) {
-                                    data = new TileLayerData(0, direction, mirror);
+                                if(tileNum < 1) {
+                                    data = new TileLayerData(0, 0, false);
                                 } else {
-                                    data = new TileLayerData(tile - 1, direction, mirror);
+                                    // set the tile data
+                                    setTileData(pos, i, tileNum);
+                                    if(tileNum > 0 && tileNum <= TILETYPE.ladder) {
+                                        setTileCollisionData(pos, tileNum)
+                                    }
+                                    
+                                    data = new TileLayerData(tileNum - 1, 0, false);
                                 }
                                 
                                 tileLay[i].setData(pos, data);
                             }
                         }
-
-                        console.table(tileData)
-                        console.log(tileData[1].length)
-                        console.table(tileLay)
 
                         tileLay[i].redraw()
                         break
@@ -204,8 +177,8 @@ function gameInit()
     // tileLayer.redraw();
 
     // // move camera to center of collision
-    setCameraPos(vec2(15, 10));
-    setCameraScale(24);
+    setCameraPos(vec2(10, 10));
+    setCameraScale(32);
 
     // enable gravity
     setGravity(-.01);
@@ -225,13 +198,13 @@ function gameInit()
     particleEmitter.trailScale = 2;  // stretch in direction of motion
 
     loadLevel()
-
-    console.log(particleEmitter)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdate()
 {
+    // updatePositionComp(world)
+
     if (mouseWasPressed(0))
     {
         // play sound when mouse is pressed
