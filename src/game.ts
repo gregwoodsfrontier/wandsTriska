@@ -20,19 +20,14 @@ import {
     overlayContext,
     overlayCanvas,
     tileCollisionSize,
-    isUsingGamepad,
-    gamepadStick,
-    keyIsDown,
-    clamp,
-    TileInfo,
-    Timer,
-    EngineObject,
-    gamepadIsDown} from 'littlejsengine'
+    debugText,
+    debug} from 'littlejsengine'
 
-import { addComponent, addEntity, createWorld, defineEnterQueue, query, World } from 'bitecs';
-import { EngineObjectsComp, GroundTimer, HealthComp, JumpData, MoveInput, PlayerTag } from './components';
-import { createPlayerByEntity, Player } from './player';
-import { JumpingEntityQuery, JumpQuery, MoveInputQueries, PlayerMoveQueries } from './queries';
+import { createWorld, World } from 'bitecs';
+import { createPlayerByEntity } from './player';
+import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem } from './systems';
+import { playerHealthQuery } from './queries';
+import { HealthComp } from './components';
 
 async function getTileMapData(link: string) {
     const response = await fetch(link);
@@ -142,46 +137,9 @@ function loadLevel() {
     })
 }
 
-
-
-const inputSystem = (_world: World) => {
-    for(let e of JumpQuery(world)) {
-        JumpData.isHoldingJump[e] = keyIsDown('ArrowUp') || gamepadIsDown(0)
-    }
-
-    for (let e of MoveInputQueries(_world)) {
-        MoveInput.x[e] = isUsingGamepad ? gamepadStick(0).x : keyIsDown("ArrowRight") ? 1 : keyIsDown("ArrowLeft") ? -1 : 0
-        MoveInput.y[e] = isUsingGamepad ? gamepadStick(0).y : keyIsDown("ArrowUp") ? 1 : keyIsDown("ArrowDown") ? -1 : 0
-    }
-}
-
-const handleJumpSys = (_world: World) => {
-    for(let e of JumpingEntityQuery(world)) {
-        if(!JumpData.isHoldingJump[e]) {
-            JumpData.pressedJumpTimer[e].unset()
-        } else if (!JumpData.wasHoldingJump[e]) {
-            JumpData.pressedJumpTimer[e].set(0.3)
-        }
-
-        JumpData.wasHoldingJump[e] = JumpData.isHoldingJump[e]
-
-        if(EngineObjectsComp[e].groundObject) {
-            GroundTimer[e].set(0.1)
-        }
-
-        if(GroundTimer[e] && GroundTimer[e].active()){
-            if(JumpData.pressedJumpTimer[e].active()) {
-                EngineObjectsComp[e].velocity.y = 0.15
-                JumpData.jumpTimer[e].set(0.2)
-            }
-        }
-    }
-}
-
-const playerMoveSystem = (_world: World) => {
-    for (let e of PlayerMoveQueries(_world)) {
-        EngineObjectsComp[e].velocity.x = clamp(EngineObjectsComp[e].velocity.x + MoveInput.x[e] * 0.042, -PlayerTag.maxSpeed[e], PlayerTag.maxSpeed[e])
-    }
+const getPlayerHealth = (_world: World) => {
+    const entities = playerHealthQuery(_world)
+    return HealthComp.health[entities[0]]
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -217,7 +175,8 @@ function gameUpdate()
     inputSystem(world)
     playerMoveSystem(world)
     handleJumpSys(world)
-
+    handleHealthSystem(world)
+    handleDamageSystem(world)
 
     if (mouseWasPressed(0))
     {
@@ -248,7 +207,7 @@ function gameUpdatePost()
 function gameRender()
 {
     // draw a grey square in the background without using webgl
-    drawRect(vec2(16,8), vec2(20,14), hsl(0,0,.6), 0, false);
+    drawRect(vec2(16,8), vec2(20,30), hsl(0,0,.6), 0, false)
     
 }
 
@@ -257,17 +216,18 @@ function gameRenderPost()
 {
     // draw to overlay canvas for hud rendering
     const drawText = (text: string, x: number, y: number, size=40) =>
-        {
-            overlayContext.textAlign = 'center';
-            overlayContext.textBaseline = 'top';
-            overlayContext.font = size + 'px arial';
-            overlayContext.fillStyle = '#fff';
-            overlayContext.lineWidth = 3;
-            overlayContext.strokeText(text, x, y);
-            overlayContext.fillText(text, x, y);
-        }
-        drawText('Score: 0' ,   overlayCanvas.width*1/4, 20);
-        drawText('Deaths: 0', overlayCanvas.width*3/4, 20);
+    {
+        overlayContext.textAlign = 'center';
+        overlayContext.textBaseline = 'top';
+        overlayContext.font = size + 'px arial';
+        overlayContext.fillStyle = '#fff';
+        overlayContext.lineWidth = 3;
+        overlayContext.strokeText(text, x, y);
+        overlayContext.fillText(text, x, y);
+    }
+
+    drawText(`Health: ${getPlayerHealth(world)}` ,   overlayCanvas.width*1/4, 20);
+    drawText('Deaths: 0', overlayCanvas.width*3/4, 20);
     
 }
 

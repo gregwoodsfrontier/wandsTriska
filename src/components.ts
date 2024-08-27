@@ -9,6 +9,8 @@ export const HealthComp = {
     deadTimer: [] as Timer[]
 }
 
+export const DamageComp = [] as number[]
+
 export const EngineObjectsComp = [] as EngineObject[]
 
 export const PlayerTag = {
@@ -27,4 +29,5 @@ export const JumpData = {
     wasHoldingJump: [] as boolean[],
     pressedJumpTimer: [] as Timer[],
     jumpTimer: [] as Timer[],
+    vel: [] as number[]
 }

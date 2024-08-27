@@ -10,7 +10,7 @@ export const createPlayerByEntity = (_pos: Vector2, _size: Vector2, _tile: TileI
         addComponent(_world, comps[i], e)
     }
 
-    HealthComp.health[e] = 1
+    HealthComp.health[e] = 5
     HealthComp.damageTimer[e] = new Timer
     HealthComp.deadTimer[e] = new Timer
 
@@ -23,6 +23,7 @@ export const createPlayerByEntity = (_pos: Vector2, _size: Vector2, _tile: TileI
     JumpData.wasHoldingJump[e] = false
     JumpData.jumpTimer[e] = new Timer
     JumpData.pressedJumpTimer[e] = new Timer
+    JumpData.vel[e] = 0.25
 
     GroundTimer[e] = new Timer
 
