@@ -1,4 +1,4 @@
-import { removeComponent, World } from "bitecs"
+import { removeComponent, removeEntity, World } from "bitecs"
 import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasReleased } from "littlejsengine"
 import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, HealthComp, DamageComp } from "./components"
 import { JumpQuery, MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery } from "./queries"
@@ -10,7 +10,8 @@ export const handleHealthSystem = (_world: World) => {
 
     for(let e of HealthEntityQuery(_world)) {
         if(isDead(e)) {
-            EngineObjectsComp[e].destroy()
+            removeEntity(_world, e)
+            // EngineObjectsComp[e].destroy()
         }
 
         if(HealthComp.health[e] > 0 && HealthComp.damageTimer[e].isSet()) {
@@ -21,7 +22,8 @@ export const handleHealthSystem = (_world: World) => {
         }
 
         if(HealthComp.health[e] > 0 && EngineObjectsComp[e].pos.y < -9) {
-            EngineObjectsComp[e].destroy()
+            removeEntity(_world, e)
+            // EngineObjectsComp[e].destroy()
         }
     }
 }
