@@ -19,11 +19,20 @@ import {
     Vector2,
     overlayContext,
     overlayCanvas,
-    tileCollisionSize} from 'littlejsengine'
+    tileCollisionSize,
+    isUsingGamepad,
+    gamepadStick,
+    keyIsDown,
+    clamp,
+    TileInfo,
+    Timer,
+    EngineObject,
+    gamepadIsDown} from 'littlejsengine'
 
-import { createWorld, query, World } from 'bitecs';
-import { EngineObjectsComp} from './components';
-import { Player } from './player';
+import { addComponent, addEntity, createWorld, defineEnterQueue, query, World } from 'bitecs';
+import { EngineObjectsComp, GroundTimer, HealthComp, JumpData, MoveInput, PlayerTag } from './components';
+import { createPlayerByEntity, Player } from './player';
+import { JumpingEntityQuery, JumpQuery, MoveInputQueries, PlayerMoveQueries } from './queries';
 
 async function getTileMapData(link: string) {
     const response = await fetch(link);
@@ -38,7 +47,7 @@ const world = createWorld();
 
 
 // show the LittleJS splash screen
-setShowSplashScreen(true);
+setShowSplashScreen(false);
 
 // sound effects
 const sound_click = new Sound([1,.5]);
@@ -59,12 +68,6 @@ const setTileData = (pos: Vector2, layer: number, data: number)=>
 const getTileData = (pos: Vector2, layer: number)=>
     pos.arrayCheck(tileCollisionSize) ? tileData[layer][(pos.y|0)*tileCollisionSize.x+pos.x|0]: 0;
 
-function createPlayer (_pos: Vector2) {
-
-    const player = new Player(_pos, vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player), world)
-
-    return player
-}
 
 enum TILETYPE {
     break = 2,
@@ -73,8 +76,8 @@ enum TILETYPE {
 }
 
 enum TILEMAP_LOOKUP {
-    player = 9,
-    demon = 10,
+    player = 10,
+    demon = 15,
     blob = 11,
     tri = 12,
     spike = 13,
@@ -103,8 +106,7 @@ function loadLevel() {
                                 const tileNum = layerData[y*levelSize.x + x];
 
                                 if(tileNum == TILEMAP_LOOKUP.player) {
-                                    createPlayer(pos.add(vec2(0, 5)))
-                                    console.log("player tile")
+                                    createPlayerByEntity(pos.add(vec2(0,1)), vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player-1), world)
                                     continue
                                 }
 
@@ -140,42 +142,51 @@ function loadLevel() {
     })
 }
 
+
+
+const inputSystem = (_world: World) => {
+    for(let e of JumpQuery(world)) {
+        JumpData.isHoldingJump[e] = keyIsDown('ArrowUp') || gamepadIsDown(0)
+    }
+
+    for (let e of MoveInputQueries(_world)) {
+        MoveInput.x[e] = isUsingGamepad ? gamepadStick(0).x : keyIsDown("ArrowRight") ? 1 : keyIsDown("ArrowLeft") ? -1 : 0
+        MoveInput.y[e] = isUsingGamepad ? gamepadStick(0).y : keyIsDown("ArrowUp") ? 1 : keyIsDown("ArrowDown") ? -1 : 0
+    }
+}
+
+const handleJumpSys = (_world: World) => {
+    for(let e of JumpingEntityQuery(world)) {
+        if(!JumpData.isHoldingJump[e]) {
+            JumpData.pressedJumpTimer[e].unset()
+        } else if (!JumpData.wasHoldingJump[e]) {
+            JumpData.pressedJumpTimer[e].set(0.3)
+        }
+
+        JumpData.wasHoldingJump[e] = JumpData.isHoldingJump[e]
+
+        if(EngineObjectsComp[e].groundObject) {
+            GroundTimer[e].set(0.1)
+        }
+
+        if(GroundTimer[e] && GroundTimer[e].active()){
+            if(JumpData.pressedJumpTimer[e].active()) {
+                EngineObjectsComp[e].velocity.y = 0.15
+                JumpData.jumpTimer[e].set(0.2)
+            }
+        }
+    }
+}
+
+const playerMoveSystem = (_world: World) => {
+    for (let e of PlayerMoveQueries(_world)) {
+        EngineObjectsComp[e].velocity.x = clamp(EngineObjectsComp[e].velocity.x + MoveInput.x[e] * 0.042, -PlayerTag.maxSpeed[e], PlayerTag.maxSpeed[e])
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
-    
-    // // create tile collision and visible tile layer
-    // const tileCollisionSize = vec2(32, 16);
-    // initTileCollision(tileCollisionSize);
-    // const pos = vec2();
-    // const tileLayer = new TileLayer(pos, tileCollisionSize);
-
-    // // get level data from the tiles image
-    // // const mainContext = mainContext;
-    // const tileImage = textureInfos[0].image;
-    // mainContext.drawImage(tileImage, 0, 0);
-    // const imageData = mainContext.getImageData(0,0,tileImage.width,tileImage.height).data;
-    // for (pos.x = tileCollisionSize.x; pos.x--;)
-    // for (pos.y = tileCollisionSize.y; pos.y--;)
-    // {
-    //     // check if this pixel is set
-    //     const i = pos.x + tileImage.width*(15 + tileCollisionSize.y - pos.y);
-    //     if (!imageData[4*i])
-    //         continue;
-        
-    //     // set tile data
-    //     const tileIndex = 1;
-    //     const direction = randInt(4)
-    //     const mirror = !randInt(2);
-    //     const color = randColor();
-    //     const data = new TileLayerData(tileIndex, direction, mirror, color);
-    //     tileLayer.setData(pos, data);
-    //     setTileCollisionData(pos, 1);
-    // }
-
-    // // draw tile layer with new data
-    // tileLayer.redraw();
-
     // // move camera to center of collision
     setCameraPos(vec2(10, 10));
     setCameraScale(32);
@@ -203,12 +214,15 @@ function gameInit()
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdate()
 {
-    // updatePositionComp(world)
+    inputSystem(world)
+    playerMoveSystem(world)
+    handleJumpSys(world)
+
 
     if (mouseWasPressed(0))
     {
         // play sound when mouse is pressed
-        sound_click.play(mousePos);
+        // sound_click.play(mousePos);
 
         // change particle color and set to fade out
         particleEmitter.colorStartA = hsl();
