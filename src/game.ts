@@ -20,14 +20,23 @@ import {
     overlayContext,
     overlayCanvas,
     tileCollisionSize,
-    debugText,
-    debug} from 'littlejsengine'
+    mainCanvasSize,
+    percent,
+    clamp,
+    cameraPos,
+    gravity,
+    objectDefaultAngleDamping,
+    objectDefaultDamping,
+    setObjectDefaultAngleDamping,
+    setObjectDefaultDamping,
+
+} from 'littlejsengine'
 
 import { createWorld, World } from 'bitecs';
 import { createPlayerByEntity } from './player';
 import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem } from './systems';
-import { playerHealthQuery } from './queries';
-import { HealthComp } from './components';
+import { playerHealthQuery, PlayerMoveQueries } from './queries';
+import { EngineObjectsComp, HealthComp } from './components';
 
 async function getTileMapData(link: string) {
     const response = await fetch(link);
@@ -54,6 +63,11 @@ let particleEmitter: ParticleEmitter;
 
 let levelSize: Vector2
 
+const gameParams = {
+    score: 0,
+    deaths: 0
+}
+
 const tileData = [] as number[][]
 const tileLay = [] as TileLayer[]
 
@@ -77,6 +91,37 @@ enum TILEMAP_LOOKUP {
     tri = 12,
     spike = 13,
     fireball = 14
+}
+
+function getCameraTarget () {
+    // camera is above player
+    const offset = 3 * percent(mainCanvasSize.y, 300, 600);
+    const playerEntity = playerHealthQuery(world)[0]
+    const player = EngineObjectsComp[playerEntity]
+
+    if(!player) return vec2(0, 0)
+
+    return player.pos.add(vec2(0, offset));
+}
+
+function adjustCamera () {
+    const playerEntity = playerHealthQuery(world)[0]
+    const player = EngineObjectsComp[playerEntity]
+
+    if(!player) return
+
+    setCameraPos(cameraPos.lerp(getCameraTarget(), clamp(player.getAliveTime()/2)))
+}
+
+function initParams() {
+    // init game
+    gameParams.score = 0
+    gameParams.deaths = 0
+    setGravity(-.01)
+    setObjectDefaultAngleDamping(.99)
+    setObjectDefaultDamping(.99)
+    setCameraScale(64)
+    setCameraPos(getCameraTarget())
 }
 
 function loadLevel() {
@@ -145,13 +190,10 @@ const getPlayerHealth = (_world: World) => {
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
-    // // move camera to center of collision
-    setCameraPos(vec2(10, 10));
-    setCameraScale(32);
+    // init game with params and configs
+    initParams()
 
-    // enable gravity
-    setGravity(-.01);
-
+    /////
     // create particle emitter
     particleEmitter = new ParticleEmitter(
         vec2(16,9), 0,              // emitPos, emitAngle
@@ -165,6 +207,7 @@ function gameInit()
     );
     particleEmitter.elasticity = .3; // bounce when it collides
     particleEmitter.trailScale = 2;  // stretch in direction of motion
+    /////
 
     loadLevel()
 }
@@ -177,6 +220,8 @@ function gameUpdate()
     handleJumpSys(world)
     handleHealthSystem(world)
     handleDamageSystem(world)
+
+    /////
 
     if (mouseWasPressed(0))
     {
@@ -200,7 +245,7 @@ function gameUpdate()
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdatePost()
 {
-
+    adjustCamera()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
