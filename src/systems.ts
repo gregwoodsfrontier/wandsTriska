@@ -1,7 +1,13 @@
-import { removeComponent, removeEntity, World } from "bitecs"
-import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasReleased } from "littlejsengine"
+import { addComponent, removeComponent, removeEntity, World } from "bitecs"
+import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasReleased, keyWasPressed } from "littlejsengine"
 import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, HealthComp, DamageComp } from "./components"
-import { JumpQuery, MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery } from "./queries"
+import { JumpQuery, MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, playerQuery, EngineObjExitQueue } from "./queries"
+
+export const removeEngineObjectsSystem = (_world: World) => {
+    for(let e of EngineObjExitQueue(_world)) {
+        EngineObjectsComp[e].destroy()
+    }
+}
 
 export const handleHealthSystem = (_world: World) => {
     const isDead = (_e: number) => {
@@ -33,10 +39,7 @@ export const handleDamageSystem = (_world: World) => {
         const new_health = max(HealthComp.health[e] - DamageComp[e], 0)
         HealthComp.health[e] = new_health
 
-        HealthComp.damageTimer[e].set(.5)
-        if(HealthComp.damageTimer[e].elapsed()) {
-            removeComponent(_world, DamageComp, e)
-        }
+        removeComponent(_world, DamageComp, e)
     }
 }
 

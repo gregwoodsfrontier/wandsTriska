@@ -34,7 +34,7 @@ import {
 
 import { createWorld, World } from 'bitecs';
 import { createPlayerByEntity } from './player';
-import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem } from './systems';
+import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem } from './systems';
 import { playerHealthQuery, PlayerMoveQueries } from './queries';
 import { EngineObjectsComp, HealthComp } from './components';
 
@@ -220,9 +220,9 @@ function gameUpdate()
     handleJumpSys(world)
     handleHealthSystem(world)
     handleDamageSystem(world)
+    removeEngineObjectsSystem(world)
 
     /////
-
     if (mouseWasPressed(0))
     {
         // play sound when mouse is pressed
