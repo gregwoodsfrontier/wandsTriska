@@ -20,6 +20,8 @@ import {
     cameraPos,
     setObjectDefaultAngleDamping,
     setObjectDefaultDamping,
+    cameraScale,
+    mouseWheel,
 
 } from 'littlejsengine'
 
@@ -118,6 +120,10 @@ function gameUpdate()
     handleHealthSystem(world)
     handleDamageSystem(world)
     removeEngineObjectsSystem(world)
+
+    setCameraScale(
+        clamp(cameraScale * (1-mouseWheel*0.1), 1, 1e3)
+    )
 
     /////
     if (mouseWasPressed(0))
