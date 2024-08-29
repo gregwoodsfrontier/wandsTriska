@@ -2,6 +2,17 @@ import { EngineObject, Timer } from "littlejsengine";
 
 // Define components
 // Components can be any storage you want, here it is an SoA
+export const PlayerTag = {
+    maxSpeed: [] as number[]
+}
+
+export const EnemyTag = {
+    name: [] as 'blob'[]|'demon'[]
+}
+
+export const TrapTag = {
+    name: [] as 'spike'[]|'fire'[]
+}
 
 export const HealthComp = {
     health: [] as number[],
@@ -12,10 +23,6 @@ export const HealthComp = {
 export const DamageComp = [] as number[]
 
 export const EngineObjectsComp = [] as EngineObject[]
-
-export const PlayerTag = {
-    maxSpeed: [] as number[]
-}
 
 export const MoveInput = {
     x: [] as number[],
