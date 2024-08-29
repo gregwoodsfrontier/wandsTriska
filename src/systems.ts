@@ -1,7 +1,7 @@
-import { addComponent, removeComponent, removeEntity, World } from "bitecs"
-import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasReleased, keyWasPressed } from "littlejsengine"
+import { removeComponent, removeEntity, World } from "bitecs"
+import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max } from "littlejsengine"
 import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, HealthComp, DamageComp } from "./components"
-import { JumpQuery, MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, playerQuery, EngineObjExitQueue } from "./queries"
+import { JumpQuery, MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue } from "./queries"
 
 export const removeEngineObjectsSystem = (_world: World) => {
     for(let e of EngineObjExitQueue(_world)) {

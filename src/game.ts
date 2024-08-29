@@ -4,11 +4,7 @@ import {
     ParticleEmitter, tile,
     vec2,
     hsl,
-    initTileCollision,
-    TileLayer,
-    TileLayerData,
     randColor,
-    setTileCollisionData,
     setCameraPos,
     setCameraScale,
     setGravity,
@@ -16,39 +12,25 @@ import {
     mousePos,
     mousePosScreen,
     drawRect,
-    Vector2,
     overlayContext,
     overlayCanvas,
-    tileCollisionSize,
     mainCanvasSize,
     percent,
     clamp,
     cameraPos,
-    gravity,
-    objectDefaultAngleDamping,
-    objectDefaultDamping,
     setObjectDefaultAngleDamping,
     setObjectDefaultDamping,
 
 } from 'littlejsengine'
 
 import { createWorld, World } from 'bitecs';
-import { createPlayerByEntity } from './player';
 import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem } from './systems';
-import { playerHealthQuery, PlayerMoveQueries } from './queries';
+import { playerHealthQuery } from './queries';
 import { EngineObjectsComp, HealthComp } from './components';
-
-async function getTileMapData(link: string) {
-    const response = await fetch(link);
-    const data = await response.json();
-
-    return data;
-}
-
+import { loadLevel } from './level';
 
 // Create a world
-const world = createWorld();
-
+export const world = createWorld();
 
 // show the LittleJS splash screen
 setShowSplashScreen(false);
@@ -61,41 +43,14 @@ const sound_click = new Sound([1,.5]);
 // game variables
 let particleEmitter: ParticleEmitter;
 
-let levelSize: Vector2
-
 const gameParams = {
     score: 0,
     deaths: 0
 }
 
-const tileData = [] as number[][]
-const tileLay = [] as TileLayer[]
-
-const setTileData = (pos: Vector2, layer: number, data: number)=>
-    pos.arrayCheck(tileCollisionSize) && (tileData[layer][(pos.y|0)*tileCollisionSize.x+pos.x|0] = data);
-
-const getTileData = (pos: Vector2, layer: number)=>
-    pos.arrayCheck(tileCollisionSize) ? tileData[layer][(pos.y|0)*tileCollisionSize.x+pos.x|0]: 0;
-
-
-enum TILETYPE {
-    break = 2,
-    solid = 3,
-    ladder = 4
-}
-
-enum TILEMAP_LOOKUP {
-    player = 10,
-    demon = 15,
-    blob = 11,
-    tri = 12,
-    spike = 13,
-    fireball = 14
-}
-
 function getCameraTarget () {
     // camera is above player
-    const offset = 3 * percent(mainCanvasSize.y, 300, 600);
+    const offset = 2 * percent(mainCanvasSize.y, 300, 600);
     const playerEntity = playerHealthQuery(world)[0]
     const player = EngineObjectsComp[playerEntity]
 
@@ -124,64 +79,6 @@ function initParams() {
     setCameraPos(getCameraTarget())
 }
 
-function loadLevel() {
-    getTileMapData("/gameLevelData.json").then((data) => {
-        const tm = data
-        levelSize = vec2(tm.width, tm.height)
-        initTileCollision(levelSize)
-        // engineObjectsDestroy()
-
-        if(tm.layers) {
-            const layerCount = tm.layers.length
-            for(let i = 0; i < layerCount; i++) {
-                switch (tm.layers[i].name){
-                    case "foreground": 
-                        const layerData = tm.layers[i].data
-                        tileLay[i] = new TileLayer(vec2(), levelSize, tile(0,16,));
-                        tileData[i] = []
-
-                        for(let x = levelSize.x; x--;) {
-                            for(let y = levelSize.y; y--;) {
-                                const pos = vec2(x,levelSize.y-1-y);
-                                const tileNum = layerData[y*levelSize.x + x];
-
-                                if(tileNum == TILEMAP_LOOKUP.player) {
-                                    createPlayerByEntity(pos.add(vec2(0,1)), vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player-1), world)
-                                    continue
-                                }
-
-                                let data
-
-                                if(tileNum < 1) {
-                                    data = new TileLayerData(0, 0, false);
-                                } else {
-                                    // set the tile data
-                                    setTileData(pos, i, tileNum);
-                                    if(tileNum > 0 && tileNum <= TILETYPE.ladder) {
-                                        setTileCollisionData(pos, tileNum)
-                                    }
-                                    
-                                    data = new TileLayerData(tileNum - 1, 0, false);
-                                }
-                                
-                                tileLay[i].setData(pos, data);
-                            }
-                        }
-
-                        tileLay[i].redraw()
-                        break
-        
-                    case "background":
-                        break
-                    
-                    case "enemy":
-                        break
-                }
-            }
-        }
-    })
-}
-
 const getPlayerHealth = (_world: World) => {
     const entities = playerHealthQuery(_world)
     return HealthComp.health[entities[0]]
@@ -201,7 +98,7 @@ function gameInit()
         tile(14, 16),               // tileIndex, tileSize
         hsl(1,1,1),   hsl(0,0,0),   // colorStartA, colorStartB
         hsl(0,0,0,0), hsl(0,0,0,0), // colorEndA, colorEndB
-        2, .2, .2, .1, .05,   // time, sizeStart, sizeEnd, speed, angleSpeed
+        1, .2, .2, .1, .05,   // time, sizeStart, sizeEnd, speed, angleSpeed
         .99, 1, 1, Math.PI,   // damping, angleDamping, gravityScale, cone
         .05, .5, true, true   // fadeRate, randomness, collide, additive
     );
