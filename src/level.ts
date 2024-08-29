@@ -1,5 +1,5 @@
 import { TileLayer, TileLayerData, Vector2, initTileCollision, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
-import { createPlayerByEntity } from "./player";
+import { createPlayerByEntity as createPlayer } from "./player";
 import { world } from "./game";
 
 export const setTileData = (pos: Vector2, tileData: number[][], layer: number, data: number)=>
@@ -16,15 +16,18 @@ async function getTileMapData(link: string) {
 }
 
 export const tileData = [] as number[][]
-export const tileLay = [] as TileLayer[]
+export const tileLayers = [] as TileLayer[]
 
 export enum TILETYPE {
-    break = 2,
-    solid = 3,
-    ladder = 4
+    empty = 0,
+    break = 1,
+    solid = 2,
+    ladder = 3
 }
 
 export enum TILEMAP_LOOKUP {
+    ladder = 4,
+    block = 3,
     player = 10,
     demon = 15,
     blob = 11,
@@ -36,6 +39,7 @@ export enum TILEMAP_LOOKUP {
 export const loadLevel = () => {
     getTileMapData("/gameLevelData.json").then((data) => {
         const tm = data
+
         console.log(`dataLayers: `, data.layers)
         let levelSize = vec2(tm.width, tm.height)
         initTileCollision(levelSize)
@@ -47,7 +51,7 @@ export const loadLevel = () => {
                 switch (tm.layers[i].name){
                     case "foreground": 
                         let layerData = tm.layers[i].data
-                        tileLay[i] = new TileLayer(vec2(), levelSize, tile(0,16,));
+                        tileLayers[i] = new TileLayer(vec2(), levelSize, tile(0,16,));
                         tileData[i] = []
 
                         for(let x = levelSize.x; x--;) {
@@ -56,29 +60,48 @@ export const loadLevel = () => {
                                 const tileNum = layerData[y*levelSize.x + x];
 
                                 if(tileNum == TILEMAP_LOOKUP.player) {
-                                    createPlayerByEntity(pos.add(vec2(0,1)), vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player-1), world)
+                                    createPlayer(pos.add(vec2(0,1)), vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player-1), world)
                                     continue
                                 }
-
-                                let data
-
-                                if(tileNum < 1) {
-                                    data = new TileLayerData(0, 0, false);
-                                } else {
-                                    // set the tile data
-                                    setTileData(pos, tileData, i, tileNum);
-                                    if(tileNum > 0 && tileNum <= TILETYPE.ladder) {
-                                        setTileCollisionData(pos, tileNum)
-                                    }
-                                    
-                                    data = new TileLayerData(tileNum - 1, 0, false);
-                                }
                                 
-                                tileLay[i].setData(pos, data);
+                                let tiletype = TILETYPE.empty
+
+                                if(tileNum > 0) {
+                                    tiletype = TILETYPE.break
+                                }
+                                if(tileNum == TILEMAP_LOOKUP.ladder) {
+                                    tiletype = TILETYPE.ladder
+                                }
+                                if(tileNum == TILEMAP_LOOKUP.block) {
+                                    tiletype = TILETYPE.solid
+                                }
+
+                                if(tiletype > 0) {
+                                    setTileCollisionData(pos, tiletype)
+
+                                    const data = new TileLayerData(tileNum - 1, 0, false)
+                                    tileLayers[i].setData(pos, data);
+                                }
+
+                                // let data
+                                // if(tileNum < 1) {
+                                //     data = new TileLayerData(0, 0, false);
+                                // } else {
+                                //     // set the tile data
+                                //     setTileData(pos, tileData, i, tileNum);
+                                //     if(tileNum > 0 && tileNum <= TILETYPE.ladder) {
+                                //         setTileCollisionData(pos, tileNum)
+                                //     }
+                                    
+                                //     data = new TileLayerData(tileNum - 1, 0, false);
+                                //     tileLayers[i].setData(pos, data);
+                                // }
+                                
+                                
                             }
                         }
 
-                        tileLay[i].redraw()
+                        tileLayers[i].redraw()
                         break
         
                     case "background":
