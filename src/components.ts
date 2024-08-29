@@ -20,6 +20,11 @@ export const HealthComp = {
     deadTimer: [] as Timer[]
 }
 
+export const LadderAblity = {
+    isTouching: [] as boolean[],
+    isClimbing: [] as boolean[]
+}
+
 export const DamageComp = [] as number[]
 
 export const EngineObjectsComp = [] as EngineObject[]

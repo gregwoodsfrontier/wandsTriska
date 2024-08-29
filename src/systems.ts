@@ -74,6 +74,15 @@ export const handleJumpSys = (_world: World) => {
                 JumpData.jumpTimer[e].set(0.2)
             }
         }
+
+        // update variable height jump
+        if(JumpData.jumpTimer[e].active()) {
+            GroundTimer[e].unset()
+
+            if(JumpData.isHoldingJump[e] && EngineObjectsComp[e].velocity.y > 0) {
+                EngineObjectsComp[e].velocity.y += 0.009
+            }
+        }
     }
 }
 

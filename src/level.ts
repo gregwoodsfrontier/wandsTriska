@@ -63,6 +63,8 @@ export const loadLevel = () => {
                                     createPlayer(pos.add(vec2(0,1)), vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player-1), world)
                                     continue
                                 }
+
+                                setTileData(pos, tileData, i, tileNum);
                                 
                                 let tiletype = TILETYPE.empty
 
@@ -113,5 +115,9 @@ export const loadLevel = () => {
                 }
             }
         }
+        console.log('tileLayers: ',tileLayers)
+        console.log('tileData: ',tileData)
     })
+
+    
 }
