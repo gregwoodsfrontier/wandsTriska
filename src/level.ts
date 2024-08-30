@@ -22,10 +22,12 @@ export enum TILETYPE {
     empty = 0,
     break = 1,
     solid = 2,
-    ladder = 3
+    ladder = 3,
+    bush = 4
 }
 
 export enum TILEMAP_LOOKUP {
+    bush = 7,
     block = 3,
     ladder = 2,
     door = 4,
@@ -49,71 +51,73 @@ export const loadLevel = () => {
         if(tm.layers) {
             const layerCount = tm.layers.length
             for(let i = 0; i < layerCount; i++) {
-                switch (tm.layers[i].name){
-                    case "foreground": 
-                        let layerData = tm.layers[i].data
-                        tileLayers[i] = new TileLayer(vec2(), levelSize, tile(0,16,));
-                        tileData[i] = []
+                let layerData = tm.layers[i].data
+                tileLayers[i] = new TileLayer(vec2(), levelSize, tile(0,16));
+                tileData[i] = []
+                for(let x = levelSize.x; x--;) {
+                    for(let y = levelSize.y; y--;) {
+                        const posT = vec2(x,levelSize.y-1-y);
+                        const tileNum = layerData[y*levelSize.x + x];
+                        let tiletype
 
-                        for(let x = levelSize.x; x--;) {
-                            for(let y = levelSize.y; y--;) {
-                                const pos = vec2(x,levelSize.y-1-y);
-                                const tileNum = layerData[y*levelSize.x + x];
+                        if(tm.layers[i].name === "foreground") {
+                            if(tileNum == TILEMAP_LOOKUP.player) {
+                                createPlayer(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player-1), world)
+                                continue
+                            }
 
-                                if(tileNum == TILEMAP_LOOKUP.player) {
-                                    createPlayer(pos.add(vec2(0,1)), vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player-1), world)
-                                    continue
-                                }
-
-                                setTileData(pos, tileData, i, tileNum);
+                            setTileData(posT, tileData, i, tileNum);
                                 
-                                let tiletype = TILETYPE.empty
+                            tiletype = TILETYPE.empty
 
-                                if(tileNum > 0) {
-                                    tiletype = TILETYPE.break
-                                }
-                                if(tileNum == TILEMAP_LOOKUP.ladder) {
-                                    tiletype = TILETYPE.ladder
-                                }
-                                if(tileNum == TILEMAP_LOOKUP.block) {
-                                    tiletype = TILETYPE.solid
-                                }
+                            if(tileNum > 0) {
+                                tiletype = TILETYPE.break
+                            }
+                            if(tileNum == TILEMAP_LOOKUP.ladder) {
+                                tiletype = TILETYPE.ladder
+                            }
+                            if(tileNum == TILEMAP_LOOKUP.block) {
+                                tiletype = TILETYPE.solid
+                            }
 
-                                if(tiletype > 0) {
-                                    setTileCollisionData(pos, tiletype)
-
-                                    const data = new TileLayerData(tileNum - 1, 0, false)
-                                    tileLayers[i].setData(pos, data);
-                                }
-
-                                // let data
-                                // if(tileNum < 1) {
-                                //     data = new TileLayerData(0, 0, false);
-                                // } else {
-                                //     // set the tile data
-                                //     setTileData(pos, tileData, i, tileNum);
-                                //     if(tileNum > 0 && tileNum <= TILETYPE.ladder) {
-                                //         setTileCollisionData(pos, tileNum)
-                                //     }
-                                    
-                                //     data = new TileLayerData(tileNum - 1, 0, false);
-                                //     tileLayers[i].setData(pos, data);
-                                // }
-                                
-                                
+                            if(tiletype > 0) {
+                                setTileCollisionData(posT, tiletype)
+    
+                                const data = new TileLayerData(tileNum - 1, 0, false)
+                                tileLayers[i].setData(posT, data);
                             }
                         }
 
-                        tileLayers[i].redraw()
-                        break
-        
-                    case "background":
-                        break
-                    
-                    case "enemy":
-                        console.log(tm.layers[i].objects) // Array
-                        break
+                        if(tm.layers[i].name === "background") {
+                            setTileData(posT, tileData, i, tileNum);
+                            tiletype = TILETYPE.empty
+                            if(tileNum == TILEMAP_LOOKUP.bush) {
+                                tiletype = TILETYPE.bush
+                            }
+                            if(tiletype > 0) {
+                                const data = new TileLayerData(tileNum - 1, 0, false)
+                                tileLayers[i].setData(posT, data);
+                            }
+                        }
+
+                        if(tm.layers[i].name === "enemy") {
+                            
+                            // set the creation for your enemies
+
+                            tiletype = TILETYPE.empty
+                            if(tiletype > 0) {    
+                                const data = new TileLayerData(tileNum - 1, 0, false)
+                                tileLayers[i].setData(posT, data);
+                            }
+                        }
+
+                        
+                        
+                    }
                 }
+
+                tileLayers[i].redraw()
+                
             }
         }
         console.log('tileLayers: ',tileLayers)
