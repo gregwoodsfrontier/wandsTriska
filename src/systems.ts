@@ -1,5 +1,5 @@
 import { removeComponent, removeEntity, World } from "bitecs"
-import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max } from "littlejsengine"
+import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed } from "littlejsengine"
 import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, HealthComp, DamageComp } from "./components"
 import { JumpQuery, MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue } from "./queries"
 
@@ -51,6 +51,10 @@ export const inputSystem = (_world: World) => {
     for (let e of MoveInputQueries(_world)) {
         MoveInput.x[e] = isUsingGamepad ? gamepadStick(0).x : keyIsDown("ArrowRight") ? 1 : keyIsDown("ArrowLeft") ? -1 : 0
         MoveInput.y[e] = isUsingGamepad ? gamepadStick(0).y : keyIsDown("ArrowUp") ? 1 : keyIsDown("ArrowDown") ? -1 : 0
+    }
+
+    if(keyWasPressed("KeyT")) {
+        console.log("T debug key was pressed")
     }
 }
 

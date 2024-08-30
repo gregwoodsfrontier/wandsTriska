@@ -126,21 +126,21 @@ function gameUpdate()
     )
 
     /////
-    if (mouseWasPressed(0))
-    {
-        // play sound when mouse is pressed
-        // sound_click.play(mousePos);
+    // if (mouseWasPressed(0))
+    // {
+    //     // play sound when mouse is pressed
+    //     // sound_click.play(mousePos);
 
-        // change particle color and set to fade out
-        particleEmitter.colorStartA = hsl();
-        particleEmitter.colorStartB = randColor();
-        particleEmitter.colorEndA = particleEmitter.colorStartA.scale(1,0);
-        particleEmitter.colorEndB = particleEmitter.colorStartB.scale(1,0);
-    }
+    //     // change particle color and set to fade out
+    //     particleEmitter.colorStartA = hsl();
+    //     particleEmitter.colorStartB = randColor();
+    //     particleEmitter.colorEndA = particleEmitter.colorStartA.scale(1,0);
+    //     particleEmitter.colorEndB = particleEmitter.colorStartB.scale(1,0);
+    // }
 
-    // move particles to mouse location if on screen
-    if (mousePosScreen.x)
-        particleEmitter.pos = mousePos;
+    // // move particles to mouse location if on screen
+    // if (mousePosScreen.x)
+    //     particleEmitter.pos = mousePos;
 
     // mainLoop()
 }
