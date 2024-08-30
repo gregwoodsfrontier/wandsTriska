@@ -28,7 +28,7 @@ import {
 import { createWorld, World } from 'bitecs';
 import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem } from './systems';
 import { playerHealthQuery } from './queries';
-import { EngineObjectsComp, HealthComp } from './components';
+import { EngineObjectsComp, Health } from './components';
 import { loadLevel } from './level';
 
 // Create a world
@@ -83,7 +83,7 @@ function initParams() {
 
 const getPlayerHealth = (_world: World) => {
     const entities = playerHealthQuery(_world)
-    return HealthComp.health[entities[0]]
+    return Health.current[entities[0]]
 }
 
 ///////////////////////////////////////////////////////////////////////////////

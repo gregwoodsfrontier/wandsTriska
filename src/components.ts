@@ -14,16 +14,19 @@ export const TrapTag = {
     name: [] as 'spike'[]|'fire'[]
 }
 
-export const HealthComp = {
-    health: [] as number[],
-    damageTimer: [] as Timer[],
-    deadTimer: [] as Timer[]
+export const Health = {
+    current: [] as number[],
+    maxValue: [] as number[]
 }
 
 export const LadderAblity = {
     isTouching: [] as boolean[],
     isClimbing: [] as boolean[]
 }
+
+export const DeadTimerComp = [] as Timer[]
+
+export const DamageTimerComp = [] as Timer[]
 
 export const DamageComp = [] as number[]
 

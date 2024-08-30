@@ -1,18 +1,17 @@
 import { World, addEntity, addComponent } from "bitecs"
 import { Vector2, TileInfo, Timer, EngineObject, vec2 } from "littlejsengine"
-import { PlayerTag, MoveInput, HealthComp, JumpData, GroundTimer, EngineObjectsComp } from "./components"
+import { PlayerTag, MoveInput, Health, JumpData, GroundTimer, EngineObjectsComp } from "./components"
 
 export const createPlayerByEntity = (_pos: Vector2, _size: Vector2, _tile: TileInfo, _world: World) => {
     const e = addEntity(_world)
-    const comps = [PlayerTag, MoveInput, HealthComp, JumpData, GroundTimer, EngineObjectsComp]
+    const comps = [PlayerTag, MoveInput, Health, JumpData, GroundTimer, EngineObjectsComp]
 
     for(let i = 0; i < comps.length; i++) {
         addComponent(_world, comps[i], e)
     }
 
-    HealthComp.health[e] = 5
-    HealthComp.damageTimer[e] = new Timer
-    HealthComp.deadTimer[e] = new Timer
+    Health.maxValue[e] = 5
+    Health.current[e] = Health.maxValue[e]
 
     PlayerTag.maxSpeed[e] = 0.2
 

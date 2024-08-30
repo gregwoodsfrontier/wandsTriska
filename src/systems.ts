@@ -1,7 +1,8 @@
-import { removeComponent, removeEntity, World } from "bitecs"
-import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed } from "littlejsengine"
-import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, HealthComp, DamageComp } from "./components"
-import { JumpQuery, MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue } from "./queries"
+import { addComponent, removeComponent, removeEntity, World } from "bitecs"
+import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min } from "littlejsengine"
+import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp } from "./components"
+import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue } from "./queries"
+import { createSpikeBall } from "./enemies"
 
 export const removeEngineObjectsSystem = (_world: World) => {
     for(let e of EngineObjExitQueue(_world)) {
@@ -11,40 +12,47 @@ export const removeEngineObjectsSystem = (_world: World) => {
 
 export const handleHealthSystem = (_world: World) => {
     const isDead = (_e: number) => {
-        return HealthComp.health[_e] <= 0
+        return Health.current[_e] <= 0
     }
 
     for(let e of HealthEntityQuery(_world)) {
+        Health.current[e] = min(Health.current[e], Health.maxValue[e])
+
         if(isDead(e)) {
+            DeadTimerComp[e] = new Timer()
             removeEntity(_world, e)
-            // EngineObjectsComp[e].destroy()
         }
 
-        if(HealthComp.health[e] > 0 && HealthComp.damageTimer[e].isSet()) {
-            const a = .5 * percent(HealthComp.damageTimer[e].getPercent(), .15, 0)
-            EngineObjectsComp[e].additiveColor = hsl(0, 0, a, 0)
-        } else {
-            EngineObjectsComp[e].additiveColor = hsl(0, 0, 0, 0)
-        }
-
-        if(HealthComp.health[e] > 0 && EngineObjectsComp[e].pos.y < -9) {
+        if(Health.current[e] > 0 && EngineObjectsComp[e].pos.y < -9) {
             removeEntity(_world, e)
-            // EngineObjectsComp[e].destroy()
         }
     }
+
+
 }
 
 export const handleDamageSystem = (_world: World) => {
     for(let e of DamagedEntityQuery(_world)) {
-        const new_health = max(HealthComp.health[e] - DamageComp[e], 0)
-        HealthComp.health[e] = new_health
+        addComponent(_world, DamageTimerComp, e)
+
+        DamageTimerComp[e] = new Timer()
+
+        const new_health = max(Health.current[e] - DamageComp[e], 0)
+        Health.current[e] = new_health
+
+        if(Health.current[e] > 0 && DamageTimerComp[e].isSet()) {
+            const a = .5 * percent(DamageTimerComp[e].getPercent(), .15, 0)
+            EngineObjectsComp[e].additiveColor = hsl(0, 0, a, 0)
+        } else {
+            EngineObjectsComp[e].additiveColor = hsl(0, 0, 0, 0)
+        }
 
         removeComponent(_world, DamageComp, e)
     }
 }
 
 export const inputSystem = (_world: World) => {
-    for(let e of JumpQuery(_world)) {
+    for(let e of JumpingEntityQuery(_world)) {
         JumpData.isHoldingJump[e] = keyIsDown('ArrowUp') || gamepadIsDown(0)
     }
 
@@ -55,6 +63,7 @@ export const inputSystem = (_world: World) => {
 
     if(keyWasPressed("KeyT")) {
         console.log("T debug key was pressed")
+        createSpikeBall(_world, mousePos, vec2(1, 1))
     }
 }
 
