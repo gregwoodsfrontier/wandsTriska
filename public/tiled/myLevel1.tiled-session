@@ -60,10 +60,11 @@
     "project": "myLevel1.tiled-project",
     "recentFiles": [
         "triska.tsx",
+        "spooky6.tsx",
         "D:/js13k-littlejs-2024/examples/platformer/data/gameLevelData.tmx",
-        "triska.tmx",
-        "spooky6.tsx"
+        "triska.tmx"
     ],
+    "resizeMap.removeObjects": false,
     "tileset.embedInMap": true,
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {

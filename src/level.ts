@@ -26,10 +26,11 @@ export enum TILETYPE {
 }
 
 export enum TILEMAP_LOOKUP {
-    ladder = 4,
     block = 3,
-    player = 10,
-    demon = 15,
+    ladder = 2,
+    door = 4,
+    player = 9,
+    demon = 10,
     blob = 11,
     tri = 12,
     spike = 13,
