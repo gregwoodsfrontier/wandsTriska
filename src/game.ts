@@ -1,16 +1,12 @@
 import {
     engineInit, setShowSplashScreen,
     Sound, 
-    ParticleEmitter, tile,
+    ParticleEmitter, 
     vec2,
     hsl,
-    randColor,
     setCameraPos,
     setCameraScale,
     setGravity,
-    mouseWasPressed,
-    mousePos,
-    mousePosScreen,
     drawRect,
     overlayContext,
     overlayCanvas,
@@ -22,7 +18,6 @@ import {
     setObjectDefaultDamping,
     cameraScale,
     mouseWheel,
-
 } from 'littlejsengine'
 
 import { createWorld, World } from 'bitecs';
