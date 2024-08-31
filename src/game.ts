@@ -26,7 +26,7 @@ import {
 } from 'littlejsengine'
 
 import { createWorld, World } from 'bitecs';
-import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem } from './systems';
+import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem, renderTrapSystem } from './systems';
 import { playerHealthQuery } from './queries';
 import { EngineObjectsComp, Health } from './components';
 import { loadLevel } from './level';
@@ -154,6 +154,7 @@ function gameUpdatePost()
 ///////////////////////////////////////////////////////////////////////////////
 function gameRender()
 {
+    renderTrapSystem(world)
     // draw a grey square in the background without using webgl
     drawRect(vec2(16,8), vec2(20,30), hsl(0,0,.6), 0, false)
     

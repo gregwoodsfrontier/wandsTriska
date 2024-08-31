@@ -1,7 +1,7 @@
 import { addComponent, removeComponent, removeEntity, World } from "bitecs"
-import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min } from "littlejsengine"
+import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min, sign } from "littlejsengine"
 import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp } from "./components"
-import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue } from "./queries"
+import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery } from "./queries"
 import { createSpikeBall } from "./enemies"
 
 export const removeEngineObjectsSystem = (_world: World) => {
@@ -48,6 +48,13 @@ export const handleDamageSystem = (_world: World) => {
         }
 
         removeComponent(_world, DamageComp, e)
+    }
+}
+
+export const renderTrapSystem = (_w: World) => {
+    for(let e of trapQuery(_w)) {
+        if(Math.abs(EngineObjectsComp[e].velocity.x) < 0.005) continue
+        EngineObjectsComp[e].angle += .09 * sign(EngineObjectsComp[e].velocity.x)
     }
 }
 

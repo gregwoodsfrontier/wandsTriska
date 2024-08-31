@@ -1,6 +1,6 @@
 import { addComponents, addEntity, World } from "bitecs"
 import { EnemyTag, EngineObjectsComp, GroundTimer, Health, JumpData, TrapTag } from "./components"
-import { EngineObject, tile, Vector2 } from "littlejsengine"
+import { EngineObject, randInCircle, sign, tile, Vector2 } from "littlejsengine"
 
 export const creatBlob = (_w: World) => {
      // the blob jumps randomly if it is close to player
@@ -27,8 +27,10 @@ export const createSpikeBall = (_w: World, _pos: Vector2, _size: Vector2) => {
     Health.current[e] = Health.maxValue[e]
 
     EngineObjectsComp[e] = new EngineObject(_pos, _size, tile(12, 16))
-    EngineObjectsComp[e].elasticity = 0.999
+    EngineObjectsComp[e].elasticity = 0.5
     EngineObjectsComp[e].setCollision(true, true)
+
+    EngineObjectsComp[e].velocity = randInCircle(0.1)
 }
 
 export const createFireBall = () => {

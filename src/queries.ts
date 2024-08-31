@@ -1,5 +1,5 @@
 import { defineExitQueue, query, World } from "bitecs";
-import { DamageComp, EngineObjectsComp, GroundTimer, Health, JumpData, MoveInput, PlayerTag } from "./components";
+import { DamageComp, EngineObjectsComp, GroundTimer, Health, JumpData, MoveInput, PlayerTag, TrapTag } from "./components";
 
 export const HealthEntityQuery = (_world: World) => {
     return query(_world, [Health, EngineObjectsComp])
@@ -27,6 +27,10 @@ export const playerHealthQuery = (_world: World) => {
 
 export const playerQuery = (_world: World) => {
     return query(_world, [PlayerTag])
+}
+
+export const trapQuery = (_world: World) => {
+    return query(_world, [TrapTag, EngineObjectsComp])
 }
 
 export const EngineObjExitQueue = defineExitQueue([EngineObjectsComp])
