@@ -1,13 +1,34 @@
 import { addComponent, removeComponent, removeEntity, World } from "bitecs"
 import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min, sign, TileLayer } from "littlejsengine"
-import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp, DestroyTileCount } from "./components"
-import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery, DestroyTileEnterQueue } from "./queries"
+import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp, DestroyTileCount, TileCount } from "./components"
+import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery, DestroyTileEnterQueue, TileCountQuery } from "./queries"
 import { createSpikeBall } from "./enemies"
 import { destroyTile } from "./level"
+import { world } from "./game"
 
 export const removeEngineObjectsSystem = (_world: World) => {
     for(let e of EngineObjExitQueue(_world)) {
         EngineObjectsComp[e].destroy()
+    }
+}
+
+export const tileCountingSystem = (_w: World) => {
+    for(let e of TileCountQuery(_w)) {
+        const {pos} = EngineObjectsComp[e]
+        const{prePosX, current, trigger} = TileCount
+        const delta = Math.abs(pos.x - prePosX[e])
+
+        if(EngineObjectsComp[e].groundObject) {
+            current[e] += Math.floor(delta*100)/100
+        }
+        
+        if(Math.floor(current[e]) > trigger[e]) {
+            console.log("trigger")
+            createSpikeBall(world, pos.add(vec2(3, 3)), vec2(1, 1))
+            current[e] %= trigger[e]+1
+        }
+
+        TileCount.prePosX[e] = pos.x
     }
 }
 

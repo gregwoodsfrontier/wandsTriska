@@ -21,9 +21,9 @@ import {
 } from 'littlejsengine'
 
 import { createWorld, World } from 'bitecs';
-import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem, renderTrapSystem, destroyTileSystem } from './systems';
-import { playerHealthQuery } from './queries';
-import { EngineObjectsComp, Health } from './components';
+import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem, renderTrapSystem, destroyTileSystem, tileCountingSystem } from './systems';
+import { playerHealthQuery, TileCountQuery } from './queries';
+import { EngineObjectsComp, Health, TileCount } from './components';
 import { loadLevel, tileData, tileLayers } from './level';
 
 // Create a world
@@ -81,6 +81,11 @@ const getPlayerHealth = (_world: World) => {
     return Health.current[entities[0]]
 }
 
+const getPlayerSteps = (_world: World) => {
+    const entities = TileCountQuery(_world)
+    return TileCount.current[entities[0]]
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
@@ -112,6 +117,7 @@ function gameUpdate()
     inputSystem(world)
     destroyTileSystem(world, tileLayers, tileData)
     playerMoveSystem(world)
+    tileCountingSystem(world)
     handleJumpSys(world)
     handleHealthSystem(world)
     handleDamageSystem(world)
@@ -172,6 +178,10 @@ function gameRenderPost()
     }
 
     drawText(`Health: ${getPlayerHealth(world)}` ,   overlayCanvas.width*1/4, 20);
+    if(getPlayerSteps(world)) {
+        drawText(`Steps: ${getPlayerSteps(world).toFixed(2)}` ,   overlayCanvas.width*1/4, 60);
+    }
+    
     drawText('Deaths: 0', overlayCanvas.width*3/4, 20);
     
 }

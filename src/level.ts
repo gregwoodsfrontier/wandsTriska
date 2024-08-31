@@ -31,6 +31,7 @@ export enum TILEMAP_LOOKUP {
     block = 3,
     ladder = 2,
     door = 4,
+    key = 8,
     player = 9,
     demon = 10,
     blob = 11,
@@ -49,9 +50,6 @@ export const destroyTile = (_pos: Vector2, _tileLayers: TileLayer[], _tileData: 
     // checl foreground index. hard codiing it.
     const foreGIdx = 0
     const layer =_tileLayers[foreGIdx]
-    // const centerPos = _pos.add(vec2(.5));
-    // const layerData = layer.getData(_pos);
-    // if (!layerData || tileType == TILETYPE.solid || TILETYPE.ladder) return false;
    if(tileType == TILETYPE.break) {
         // set and clear tile
         layer.setData(_pos, new TileLayerData, true);
@@ -99,7 +97,10 @@ export const loadLevel = () => {
                             if(tileNum == TILEMAP_LOOKUP.ladder) {
                                 tiletype = TILETYPE.ladder
                             }
-                            if(tileNum == TILEMAP_LOOKUP.block) {
+                            if(tileNum == TILEMAP_LOOKUP.block || 
+                                tileNum == TILEMAP_LOOKUP.door ||
+                                tileNum == TILEMAP_LOOKUP.key
+                            ) {
                                 tiletype = TILETYPE.solid
                             }
 

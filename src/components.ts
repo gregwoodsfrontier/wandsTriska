@@ -6,6 +6,13 @@ export const PlayerTag = {
     maxSpeed: [] as number[]
 }
 
+export const TileCount = {
+    distacnePerCount: [] as number[],
+    prePosX: [] as number[], // parameter to keep track of the position x previous frame
+    current: [] as number[],
+    trigger: [] as number[]
+}
+
 export const EnemyTag = {
     name: [] as 'blob'[]|'demon'[]
 }
