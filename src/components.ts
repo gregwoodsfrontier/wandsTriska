@@ -39,6 +39,10 @@ export const MoveInput = {
 
 export const GroundTimer = [] as Timer[]
 
+export const AliveTime = [] as Timer[]
+
+export const DestroyTileCount = [] as number[]
+
 export const JumpData = {
     isHoldingJump: [] as boolean[],
     wasHoldingJump: [] as boolean[],

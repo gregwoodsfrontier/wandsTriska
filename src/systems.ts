@@ -1,12 +1,33 @@
 import { addComponent, removeComponent, removeEntity, World } from "bitecs"
-import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min, sign } from "littlejsengine"
-import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp } from "./components"
-import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery } from "./queries"
+import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min, sign, TileLayer } from "littlejsengine"
+import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp, DestroyTileCount } from "./components"
+import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery, DestroyTileEnterQueue } from "./queries"
 import { createSpikeBall } from "./enemies"
+import { destroyTile } from "./level"
 
 export const removeEngineObjectsSystem = (_world: World) => {
     for(let e of EngineObjExitQueue(_world)) {
         EngineObjectsComp[e].destroy()
+    }
+}
+
+export const destroyTileSystem = (_w: World, _tileLayers: TileLayer[], _tileData: number[][]) => {
+    for(let e of DestroyTileEnterQueue(_w)) {
+        EngineObjectsComp[e].collideWithTile = (data, pos) => {
+            if(data <= 0) return false
+
+            const check = destroyTile(pos, _tileLayers, _tileData)
+
+            if (check) {
+                DestroyTileCount[e] += 1
+            }
+
+            if (DestroyTileCount[e] > 4) {
+                Health.current[e] = 0
+            }
+            
+            return true
+        }
     }
 }
 

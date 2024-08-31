@@ -1,5 +1,5 @@
 import { addComponents, addEntity, World } from "bitecs"
-import { EnemyTag, EngineObjectsComp, GroundTimer, Health, JumpData, TrapTag } from "./components"
+import { DestroyTileCount, EnemyTag, EngineObjectsComp, GroundTimer, Health, JumpData, TrapTag } from "./components"
 import { EngineObject, randInCircle, sign, tile, Vector2 } from "littlejsengine"
 
 export const creatBlob = (_w: World) => {
@@ -20,7 +20,7 @@ export const createDemon = (_w: World) => {
 
 export const createSpikeBall = (_w: World, _pos: Vector2, _size: Vector2) => {
     const e = addEntity(_w)
-    addComponents(_w, [TrapTag, EngineObjectsComp, Health], e)
+    addComponents(_w, [TrapTag, EngineObjectsComp, Health, DestroyTileCount], e)
     TrapTag.name[e] = 'spike'
 
     Health.maxValue[e] = 1
@@ -31,6 +31,9 @@ export const createSpikeBall = (_w: World, _pos: Vector2, _size: Vector2) => {
     EngineObjectsComp[e].setCollision(true, true)
 
     EngineObjectsComp[e].velocity = randInCircle(0.1)
+
+    DestroyTileCount[e] = 0
+
 }
 
 export const createFireBall = () => {

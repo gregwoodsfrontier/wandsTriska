@@ -21,10 +21,10 @@ import {
 } from 'littlejsengine'
 
 import { createWorld, World } from 'bitecs';
-import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem, renderTrapSystem } from './systems';
+import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem, renderTrapSystem, destroyTileSystem } from './systems';
 import { playerHealthQuery } from './queries';
 import { EngineObjectsComp, Health } from './components';
-import { loadLevel } from './level';
+import { loadLevel, tileData, tileLayers } from './level';
 
 // Create a world
 export const world = createWorld();
@@ -110,6 +110,7 @@ function gameInit()
 function gameUpdate()
 {
     inputSystem(world)
+    destroyTileSystem(world, tileLayers, tileData)
     playerMoveSystem(world)
     handleJumpSys(world)
     handleHealthSystem(world)

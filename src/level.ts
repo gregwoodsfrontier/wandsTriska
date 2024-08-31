@@ -1,4 +1,4 @@
-import { TileLayer, TileLayerData, Vector2, initTileCollision, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
+import { TileLayer, TileLayerData, Vector2, getTileCollisionData, initTileCollision, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
 import { createPlayerByEntity as createPlayer } from "./player";
 import { world } from "./game";
 
@@ -39,11 +39,34 @@ export enum TILEMAP_LOOKUP {
     fireball = 14
 }
 
+export const destroyTile = (_pos: Vector2, _tileLayers: TileLayer[], _tileData: number[][]) => {
+    _pos = _pos.floor()
+
+    // destroy tile
+    const tileType = getTileCollisionData(_pos);
+    if (!tileType) return false;
+
+    // checl foreground index. hard codiing it.
+    const foreGIdx = 0
+    const layer =_tileLayers[foreGIdx]
+    // const centerPos = _pos.add(vec2(.5));
+    // const layerData = layer.getData(_pos);
+    // if (!layerData || tileType == TILETYPE.solid || TILETYPE.ladder) return false;
+   if(tileType == TILETYPE.break) {
+        // set and clear tile
+        layer.setData(_pos, new TileLayerData, true);
+        setTileCollisionData(_pos, TILETYPE.empty);
+        setTileData(_pos, _tileData, foreGIdx, 0);
+
+        return true
+   }
+
+   return false
+}
+
 export const loadLevel = () => {
     getTileMapData("/gameLevelData.json").then((data) => {
         const tm = data
-
-        console.log(`dataLayers: `, data.layers)
         let levelSize = vec2(tm.width, tm.height)
         initTileCollision(levelSize)
         // engineObjectsDestroy()
@@ -120,8 +143,6 @@ export const loadLevel = () => {
                 
             }
         }
-        console.log('tileLayers: ',tileLayers)
-        console.log('tileData: ',tileData)
     })
 
     
