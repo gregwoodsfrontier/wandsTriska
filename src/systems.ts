@@ -1,14 +1,36 @@
 import { addComponent, removeComponent, removeEntity, World } from "bitecs"
-import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min, sign, TileLayer } from "littlejsengine"
-import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp, DestroyTileCount, TileCount } from "./components"
-import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery, DestroyTileEnterQueue, TileCountQuery } from "./queries"
+import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min, sign, TileLayer, getTileCollisionData } from "littlejsengine"
+import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp, DestroyTileCount, TileCount, LadderAblity } from "./components"
+import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery, DestroyTileEnterQueue, TileCountQuery, LadderQuery } from "./queries"
 import { createSpikeBall } from "./enemies"
-import { destroyTile } from "./level"
+import { destroyTile, TILETYPE } from "./level"
 import { world } from "./game"
 
 export const removeEngineObjectsSystem = (_world: World) => {
     for(let e of EngineObjExitQueue(_world)) {
         EngineObjectsComp[e].destroy()
+    }
+}
+
+export const ladderClimbingSystem = (_w: World) => {
+    for(let e of LadderQuery(_w)) {
+        const {pos, size} = EngineObjectsComp[e]
+        for(let y=2;y--;) {
+            const checkPos = pos.add(
+                vec2(
+                    0, y - size.y/2 + 0.1 * MoveInput.y[e]
+                )
+            )
+            const collisiondata = getTileCollisionData(checkPos)
+            LadderAblity.isTouching[e] ||= collisiondata == TILETYPE.ladder
+        }
+        
+        // check if character is touching ladder
+        if(!LadderAblity.isTouching[e]) {
+            LadderAblity.isClimbing[e] = false
+        } else if (MoveInput.y[e]) {
+            LadderAblity.isClimbing[e] = true
+        }
     }
 }
 

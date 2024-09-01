@@ -1,7 +1,5 @@
 import {
     engineInit, setShowSplashScreen,
-    Sound, 
-    ParticleEmitter, 
     vec2,
     hsl,
     setCameraPos,
@@ -33,12 +31,12 @@ export const world = createWorld();
 setShowSplashScreen(false);
 
 // sound effects
-const sound_click = new Sound([1,.5]);
+// const sound_click = new Sound([1,.5]);
 
 // medals
 
 // game variables
-let particleEmitter: ParticleEmitter;
+// let particleEmitter: ParticleEmitter;
 
 const gameParams = {
     score: 0,
@@ -117,6 +115,7 @@ function gameUpdate()
     inputSystem(world)
     destroyTileSystem(world, tileLayers, tileData)
     playerMoveSystem(world)
+    // ladderClimbingSystem(world)
     tileCountingSystem(world)
     handleJumpSys(world)
     handleHealthSystem(world)

@@ -1,6 +1,6 @@
 import { addComponents, addEntity, World } from "bitecs"
 import { DestroyTileCount, EnemyTag, EngineObjectsComp, GroundTimer, Health, JumpData, TrapTag } from "./components"
-import { EngineObject, randInCircle, sign, tile, Vector2 } from "littlejsengine"
+import { EngineObject, randInCircle, tile, Vector2 } from "littlejsengine"
 
 export const creatBlob = (_w: World) => {
      // the blob jumps randomly if it is close to player
