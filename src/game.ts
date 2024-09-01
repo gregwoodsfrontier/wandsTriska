@@ -16,6 +16,7 @@ import {
     setObjectDefaultDamping,
     cameraScale,
     mouseWheel,
+    tileCollisionSize,
 } from 'littlejsengine'
 
 import { createWorld, World } from 'bitecs';
@@ -157,7 +158,7 @@ function gameRender()
 {
     renderTrapSystem(world)
     // draw a grey square in the background without using webgl
-    drawRect(vec2(16,8), vec2(20,30), hsl(0,0,.6), 0, false)
+    drawRect(tileCollisionSize.divide(vec2(2,2)), tileCollisionSize, hsl(0,0,.6), 0, false)
     
 }
 

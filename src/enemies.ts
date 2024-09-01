@@ -27,7 +27,7 @@ export const createSpikeBall = (_w: World, _pos: Vector2, _size: Vector2) => {
     Health.current[e] = Health.maxValue[e]
 
     EngineObjectsComp[e] = new EngineObject(_pos, _size, tile(12, 16))
-    EngineObjectsComp[e].elasticity = 0.5
+    EngineObjectsComp[e].elasticity = 0.7
     EngineObjectsComp[e].setCollision(true, true)
 
     EngineObjectsComp[e].velocity = randInCircle(0.1)
