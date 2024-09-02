@@ -22,7 +22,7 @@ import {
 import { createWorld, World } from 'bitecs';
 import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem, renderTrapSystem, tileCountingSystem } from './systems';
 import { playerHealthQuery, TileCountQuery } from './queries';
-import { EngineObjectsComp, Health, TileCount } from './components';
+import { EOC, Health, TileCount } from './components';
 import { loadLevel2 } from './level';
 import { data } from './tileLayerData';
 
@@ -31,14 +31,6 @@ export const world = createWorld();
 
 // show the LittleJS splash screen
 setShowSplashScreen(false);
-
-// sound effects
-// const sound_click = new Sound([1,.5]);
-
-// medals
-
-// game variables
-// let particleEmitter: ParticleEmitter;
 
 const gameParams = {
     score: 0,
@@ -49,7 +41,7 @@ function getCameraTarget () {
     // camera is above player
     const offset = 2 * percent(mainCanvasSize.y, 300, 600);
     const playerEntity = playerHealthQuery(world)[0]
-    const player = EngineObjectsComp[playerEntity]
+    const player = EOC[playerEntity]
 
     if(!player) return vec2(0, 0)
 
@@ -58,7 +50,7 @@ function getCameraTarget () {
 
 function adjustCamera () {
     const playerEntity = playerHealthQuery(world)[0]
-    const player = EngineObjectsComp[playerEntity]
+    const player = EOC[playerEntity]
 
     if(!player) return
 
@@ -92,23 +84,6 @@ function gameInit()
     // init game with params and configs
     initParams()
 
-    /////
-    // create particle emitter
-    // particleEmitter = new ParticleEmitter(
-    //     vec2(16,9), 0,              // emitPos, emitAngle
-    //     1, 0, 500, Math.PI,         // emitSize, emitTime, emitRate, emiteCone
-    //     tile(14, 16),               // tileIndex, tileSize
-    //     hsl(1,1,1),   hsl(0,0,0),   // colorStartA, colorStartB
-    //     hsl(0,0,0,0), hsl(0,0,0,0), // colorEndA, colorEndB
-    //     1, .2, .2, .1, .05,   // time, sizeStart, sizeEnd, speed, angleSpeed
-    //     .99, 1, 1, Math.PI,   // damping, angleDamping, gravityScale, cone
-    //     .05, .5, true, true   // fadeRate, randomness, collide, additive
-    // );
-    // particleEmitter.elasticity = .3; // bounce when it collides
-    // particleEmitter.trailScale = 2;  // stretch in direction of motion
-    /////
-
-    // loadLevel()
     loadLevel2(data)
 }
 
@@ -118,7 +93,7 @@ function gameUpdate()
     inputSystem(world)
     // destroyTileSystem(world, tileLayers, tileData)
     playerMoveSystem(world)
-    // ladderClimbingSystem(world)
+
     tileCountingSystem(world)
     handleJumpSys(world)
     handleHealthSystem(world)

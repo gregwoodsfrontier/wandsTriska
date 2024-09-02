@@ -26,18 +26,13 @@ export const Health = {
     maxValue: [] as number[]
 }
 
-export const LadderAblity = {
-    isTouching: [] as boolean[],
-    isClimbing: [] as boolean[]
-}
-
 export const DeadTimerComp = [] as Timer[]
 
 export const DamageTimerComp = [] as Timer[]
 
 export const DamageComp = [] as number[]
 
-export const EngineObjectsComp = [] as EngineObject[]
+export const EOC = [] as EngineObject[]
 
 export const MoveInput = {
     x: [] as number[],

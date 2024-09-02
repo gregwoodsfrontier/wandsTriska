@@ -1,46 +1,24 @@
 import { addComponent, removeComponent, removeEntity, World } from "bitecs"
-import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min, sign, TileLayer, getTileCollisionData } from "littlejsengine"
-import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp, DestroyTileCount, TileCount, LadderAblity } from "./components"
-import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery, DestroyTileEnterQueue, TileCountQuery, LadderQuery } from "./queries"
+import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent, hsl, max, keyWasPressed, mousePos, vec2, Timer, min, sign, TileLayer } from "littlejsengine"
+import { JumpData, MoveInput, EOC, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp, DestroyTileCount, TileCount } from "./components"
+import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery, DestroyTileEnterQueue, TileCountQuery } from "./queries"
 import { createSpikeBall } from "./enemies"
-import { destroyTile, TILEMAP_LOOKUP } from "./level"
+import { destroyTile } from "./level"
 import { world } from "./game"
 
 export const removeEngineObjectsSystem = (_w: World) => {
     for(let e of EngineObjExitQueue(_w)) {
-        EngineObjectsComp[e].destroy()
-    }
-}
-
-export const ladderClimbingSystem = (_w: World) => {
-    for(let e of LadderQuery(_w)) {
-        const {pos, size} = EngineObjectsComp[e]
-        for(let y=2;y--;) {
-            const checkPos = pos.add(
-                vec2(
-                    0, y - size.y/2 + 0.1 * MoveInput.y[e]
-                )
-            )
-            const collisiondata = getTileCollisionData(checkPos)
-            LadderAblity.isTouching[e] ||= collisiondata == TILEMAP_LOOKUP.LADDER
-        }
-        
-        // check if character is touching ladder
-        if(!LadderAblity.isTouching[e]) {
-            LadderAblity.isClimbing[e] = false
-        } else if (MoveInput.y[e]) {
-            LadderAblity.isClimbing[e] = true
-        }
+        EOC[e].destroy()
     }
 }
 
 export const tileCountingSystem = (_w: World) => {
     for(let e of TileCountQuery(_w)) {
-        const {pos} = EngineObjectsComp[e]
+        const {pos} = EOC[e]
         const{prePosX, current, trigger} = TileCount
         const delta = Math.abs(pos.x - prePosX[e])
 
-        if(EngineObjectsComp[e].groundObject) {
+        if(EOC[e].groundObject) {
             current[e] += Math.floor(delta*100)/100
         }
         
@@ -56,7 +34,7 @@ export const tileCountingSystem = (_w: World) => {
 
 export const destroyTileSystem = (_w: World, _tileLayers: TileLayer[], _tileData: (number|undefined)[]) => {
     for(let e of DestroyTileEnterQueue(_w)) {
-        EngineObjectsComp[e].collideWithTile = (data, pos) => {
+        EOC[e].collideWithTile = (data, pos) => {
             if(data <= 0) return false
 
             const check = destroyTile(pos, _tileLayers, _tileData)
@@ -87,7 +65,7 @@ export const handleHealthSystem = (_w: World) => {
             removeEntity(_w, e)
         }
 
-        if(Health.current[e] > 0 && EngineObjectsComp[e].pos.y < -9) {
+        if(Health.current[e] > 0 && EOC[e].pos.y < -9) {
             removeEntity(_w, e)
         }
     }
@@ -106,9 +84,9 @@ export const handleDamageSystem = (_w: World) => {
 
         if(Health.current[e] > 0 && DamageTimerComp[e].isSet()) {
             const a = .5 * percent(DamageTimerComp[e].getPercent(), .15, 0)
-            EngineObjectsComp[e].additiveColor = hsl(0, 0, a, 0)
+            EOC[e].additiveColor = hsl(0, 0, a, 0)
         } else {
-            EngineObjectsComp[e].additiveColor = hsl(0, 0, 0, 0)
+            EOC[e].additiveColor = hsl(0, 0, 0, 0)
         }
 
         removeComponent(_w, DamageComp, e)
@@ -117,8 +95,8 @@ export const handleDamageSystem = (_w: World) => {
 
 export const renderTrapSystem = (_w: World) => {
     for(let e of trapQuery(_w)) {
-        if(Math.abs(EngineObjectsComp[e].velocity.x) < 0.005) continue
-        EngineObjectsComp[e].angle += .09 * sign(EngineObjectsComp[e].velocity.x)
+        if(Math.abs(EOC[e].velocity.x) < 0.005) continue
+        EOC[e].angle += .09 * sign(EOC[e].velocity.x)
     }
 }
 
@@ -148,13 +126,13 @@ export const handleJumpSys = (_w: World) => {
 
         JumpData.wasHoldingJump[e] = JumpData.isHoldingJump[e]
 
-        if(EngineObjectsComp[e].groundObject) {
+        if(EOC[e].groundObject) {
             GroundTimer[e].set(0.1)
         }
 
         if(GroundTimer[e] && GroundTimer[e].active()){
             if(JumpData.pressedJumpTimer[e].active()) {
-                EngineObjectsComp[e].velocity.y = JumpData.vel[e]
+                EOC[e].velocity.y = JumpData.vel[e]
                 JumpData.jumpTimer[e].set(0.2)
             }
         }
@@ -163,8 +141,8 @@ export const handleJumpSys = (_w: World) => {
         if(JumpData.jumpTimer[e].active()) {
             GroundTimer[e].unset()
 
-            if(JumpData.isHoldingJump[e] && EngineObjectsComp[e].velocity.y > 0) {
-                EngineObjectsComp[e].velocity.y += 0.009
+            if(JumpData.isHoldingJump[e] && EOC[e].velocity.y > 0) {
+                EOC[e].velocity.y += 0.009
             }
         }
     }
@@ -172,10 +150,10 @@ export const handleJumpSys = (_w: World) => {
 
 export const playerMoveSystem = (_w: World) => {
     for (let e of PlayerMoveQueries(_w)) {
-        EngineObjectsComp[e].velocity.x = clamp(EngineObjectsComp[e].velocity.x + MoveInput.x[e] * 0.042, -PlayerTag.maxSpeed[e], PlayerTag.maxSpeed[e])
+        EOC[e].velocity.x = clamp(EOC[e].velocity.x + MoveInput.x[e] * 0.042, -PlayerTag.maxSpeed[e], PlayerTag.maxSpeed[e])
 
         if(MoveInput.x[e]) {
-            EngineObjectsComp[e].mirror = MoveInput.x[e] < 0
+            EOC[e].mirror = MoveInput.x[e] < 0
         }
     }
 }

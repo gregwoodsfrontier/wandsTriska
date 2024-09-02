@@ -1,10 +1,10 @@
 import { World, addEntity, addComponent } from "bitecs"
 import { Vector2, TileInfo, Timer, EngineObject, vec2 } from "littlejsengine"
-import { PlayerTag, MoveInput, Health, JumpData, GroundTimer, EngineObjectsComp, TileCount, LadderAblity } from "./components"
+import { PlayerTag, MoveInput, Health, JumpData, GroundTimer, EOC, TileCount} from "./components"
 
 export const createPlayerByEntity = (_pos: Vector2, _size: Vector2, _tile: TileInfo, _world: World) => {
     const e = addEntity(_world)
-    const comps = [PlayerTag, MoveInput, Health, JumpData, GroundTimer, EngineObjectsComp, TileCount, LadderAblity]
+    const comps = [PlayerTag, MoveInput, Health, JumpData, GroundTimer, EOC, TileCount]
 
     for(let i = 0; i < comps.length; i++) {
         addComponent(_world, comps[i], e)
@@ -26,15 +26,12 @@ export const createPlayerByEntity = (_pos: Vector2, _size: Vector2, _tile: TileI
 
     GroundTimer[e] = new Timer
 
-    LadderAblity.isClimbing[e] = false
-    LadderAblity.isTouching[e] = false
+    EOC[e] = new EngineObject(_pos, _size, _tile)
 
-    EngineObjectsComp[e] = new EngineObject(_pos, _size, _tile)
-
-    EngineObjectsComp[e].drawSize = vec2(1, 1)
-    EngineObjectsComp[e].setCollision(true, false, true)
+    EOC[e].drawSize = vec2(1, 1)
+    EOC[e].setCollision(true, false, true)
 
     TileCount.current[e] = 0
-    TileCount.prePosX[e] = EngineObjectsComp[e].pos.x
+    TileCount.prePosX[e] = EOC[e].pos.x
     TileCount.trigger[e] = 12
 }

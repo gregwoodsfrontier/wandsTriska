@@ -1,12 +1,12 @@
 import { defineEnterQueue, defineExitQueue, query, World } from "bitecs";
-import { DamageComp, DestroyTileCount, EngineObjectsComp, GroundTimer, Health, JumpData, LadderAblity, MoveInput, PlayerTag, TileCount, TrapTag } from "./components";
+import { DamageComp, DestroyTileCount, EOC, GroundTimer, Health, JumpData, MoveInput, PlayerTag, TileCount, TrapTag } from "./components";
 
 export const HealthEntityQuery = (_world: World) => {
-    return query(_world, [Health, EngineObjectsComp])
+    return query(_world, [Health, EOC])
 }
 
 export const DamagedEntityQuery = (_world: World) => {
-    return query(_world, [Health, EngineObjectsComp, DamageComp])
+    return query(_world, [Health, EOC, DamageComp])
 }
 
 export const MoveInputQueries = (_world: World) => {
@@ -14,11 +14,11 @@ export const MoveInputQueries = (_world: World) => {
 }
 
 export const JumpingEntityQuery = (_world: World) => {
-    return query(_world, [JumpData, GroundTimer, EngineObjectsComp])
+    return query(_world, [JumpData, GroundTimer, EOC])
 }
 
 export const PlayerMoveQueries = (_world: World) => {
-    return query(_world, [MoveInput, PlayerTag, EngineObjectsComp])
+    return query(_world, [MoveInput, PlayerTag, EOC])
 }
 
 export const playerHealthQuery = (_world: World) => {
@@ -30,17 +30,13 @@ export const playerHealthQuery = (_world: World) => {
 // }
 
 export const trapQuery = (_world: World) => {
-    return query(_world, [TrapTag, EngineObjectsComp])
+    return query(_world, [TrapTag, EOC])
 }
 
 export const TileCountQuery = (_world: World) => {
-    return query(_world, [TileCount, EngineObjectsComp])
+    return query(_world, [TileCount, EOC])
 }
 
-export const LadderQuery = (_w: World) => {
-    return query(_w, [LadderAblity, EngineObjectsComp, MoveInput])
-}
+export const EngineObjExitQueue = defineExitQueue([EOC])
 
-export const EngineObjExitQueue = defineExitQueue([EngineObjectsComp])
-
-export const DestroyTileEnterQueue = defineEnterQueue([EngineObjectsComp, DestroyTileCount, Health])
+export const DestroyTileEnterQueue = defineEnterQueue([EOC, DestroyTileCount, Health])
