@@ -1,6 +1,4 @@
-import { TileLayer, TileLayerData, Vector2, getTileCollisionData, initTileCollision, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
-import { createPlayerByEntity as createPlayer } from "./player";
-import { world } from "./game";
+import { EngineObject, TileLayer, TileLayerData, Vector2, getTileCollisionData, initTileCollision, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
 
 export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: number|undefined)=>
     pos.arrayCheck(tileCollisionSize) && (tileData[(pos.y|0)*tileCollisionSize.x+pos.x|0] = data);
@@ -35,7 +33,9 @@ export const loadLevel2 = (_data: (number|undefined)[], _tileLayers: TileLayer[]
             const tileNum = _data[y*levelSize.x + x];
             if(!tileNum) continue
             if(tileNum == TILEMAP_LOOKUP.WIZARD) {
-                createPlayer(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1), world)
+                const p = new EngineObject(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1))
+                p.setCollision(true, true)
+                // createPlayer(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1), world)
                 continue
             }
             setTileCollisionData(posT, tileNum)

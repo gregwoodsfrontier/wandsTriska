@@ -2,32 +2,22 @@ import {
     engineInit, setShowSplashScreen,
     vec2,
     hsl,
-    setCameraPos,
     setCameraScale,
     setGravity,
     drawRect,
     overlayContext,
     overlayCanvas,
-    mainCanvasSize,
-    percent,
     clamp,
-    cameraPos,
     setObjectDefaultAngleDamping,
     setObjectDefaultDamping,
     cameraScale,
     mouseWheel,
     tileCollisionSize,
 } from 'littlejsengine'
-
-import { createWorld, World } from 'bitecs';
-import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem, renderTrapSystem, tileCountingSystem } from './systems';
-import { playerHealthQuery, TileCountQuery } from './queries';
-import { EngineObjectsComp, Health, TileCount } from './components';
 import { loadLevel2 } from './level';
 import { data } from './tileLayerData';
 
 // Create a world
-export const world = createWorld();
 
 // show the LittleJS splash screen
 setShowSplashScreen(false);
@@ -45,26 +35,6 @@ const gameParams = {
     deaths: 0
 }
 
-function getCameraTarget () {
-    // camera is above player
-    const offset = 2 * percent(mainCanvasSize.y, 300, 600);
-    const playerEntity = playerHealthQuery(world)[0]
-    const player = EngineObjectsComp[playerEntity]
-
-    if(!player) return vec2(0, 0)
-
-    return player.pos.add(vec2(0, offset));
-}
-
-function adjustCamera () {
-    const playerEntity = playerHealthQuery(world)[0]
-    const player = EngineObjectsComp[playerEntity]
-
-    if(!player) return
-
-    setCameraPos(cameraPos.lerp(getCameraTarget(), clamp(player.getAliveTime()/2)))
-}
-
 function initParams() {
     // init game
     gameParams.score = 0
@@ -73,17 +43,6 @@ function initParams() {
     setObjectDefaultAngleDamping(.99)
     setObjectDefaultDamping(.99)
     setCameraScale(64)
-    setCameraPos(getCameraTarget())
-}
-
-const getPlayerHealth = (_world: World) => {
-    const entities = playerHealthQuery(_world)
-    return Health.current[entities[0]]
-}
-
-const getPlayerSteps = (_world: World) => {
-    const entities = TileCountQuery(_world)
-    return TileCount.current[entities[0]]
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,22 +51,6 @@ function gameInit()
     // init game with params and configs
     initParams()
 
-    /////
-    // create particle emitter
-    // particleEmitter = new ParticleEmitter(
-    //     vec2(16,9), 0,              // emitPos, emitAngle
-    //     1, 0, 500, Math.PI,         // emitSize, emitTime, emitRate, emiteCone
-    //     tile(14, 16),               // tileIndex, tileSize
-    //     hsl(1,1,1),   hsl(0,0,0),   // colorStartA, colorStartB
-    //     hsl(0,0,0,0), hsl(0,0,0,0), // colorEndA, colorEndB
-    //     1, .2, .2, .1, .05,   // time, sizeStart, sizeEnd, speed, angleSpeed
-    //     .99, 1, 1, Math.PI,   // damping, angleDamping, gravityScale, cone
-    //     .05, .5, true, true   // fadeRate, randomness, collide, additive
-    // );
-    // particleEmitter.elasticity = .3; // bounce when it collides
-    // particleEmitter.trailScale = 2;  // stretch in direction of motion
-    /////
-
     // loadLevel()
     loadLevel2(data)
 }
@@ -115,15 +58,6 @@ function gameInit()
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdate()
 {
-    inputSystem(world)
-    // destroyTileSystem(world, tileLayers, tileData)
-    playerMoveSystem(world)
-    // ladderClimbingSystem(world)
-    tileCountingSystem(world)
-    handleJumpSys(world)
-    handleHealthSystem(world)
-    handleDamageSystem(world)
-    removeEngineObjectsSystem(world)
 
     setCameraScale(
         clamp(cameraScale * (1-mouseWheel*0.1), 1, 1e3)
@@ -133,13 +67,12 @@ function gameUpdate()
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdatePost()
 {
-    adjustCamera()
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameRender()
 {
-    renderTrapSystem(world)
     // draw a grey square in the background without using webgl
     drawRect(tileCollisionSize.divide(vec2(2,2)), tileCollisionSize, hsl(0,0,.6), 0, false)
     
@@ -160,11 +93,6 @@ function gameRenderPost()
         overlayContext.fillText(text, x, y);
     }
 
-    drawText(`Health: ${getPlayerHealth(world)}` ,   overlayCanvas.width*1/4, 20);
-    if(getPlayerSteps(world)) {
-        drawText(`Steps: ${getPlayerSteps(world).toFixed(2)}` ,   overlayCanvas.width*1/4, 60);
-    }
-    
     drawText('Deaths: 0', overlayCanvas.width*3/4, 20);
     
 }
