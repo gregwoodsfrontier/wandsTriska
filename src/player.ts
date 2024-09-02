@@ -93,8 +93,5 @@ export default class Player extends EngineObject {
         this.moveInput = airControlSystem(this.groundTimer, this. moveInput, this.velocity)
         this.velocity = playerMoveSys(this.moveInput, this.velocity, this.maxSpeed, this.mirror)
         this.mirror = mirrorHandling(this.moveInput, this.mirror)
-        
-        // let oA = airControlSystem(this.groundTimer, this.moveInput, this.velocity, this.gravityScale)
-        // oA.m = this.moveInput; oA.v = this.velocity
     }
 }
