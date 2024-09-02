@@ -20,10 +20,11 @@ import {
 } from 'littlejsengine'
 
 import { createWorld, World } from 'bitecs';
-import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem, renderTrapSystem, destroyTileSystem, tileCountingSystem } from './systems';
+import { inputSystem, playerMoveSystem, handleJumpSys, handleHealthSystem, handleDamageSystem, removeEngineObjectsSystem, renderTrapSystem, tileCountingSystem } from './systems';
 import { playerHealthQuery, TileCountQuery } from './queries';
 import { EngineObjectsComp, Health, TileCount } from './components';
-import { loadLevel, tileData, tileLayers } from './level';
+import { loadLevel2 } from './level';
+import { data } from './tileLayerData';
 
 // Create a world
 export const world = createWorld();
@@ -107,14 +108,15 @@ function gameInit()
     // particleEmitter.trailScale = 2;  // stretch in direction of motion
     /////
 
-    loadLevel()
+    // loadLevel()
+    loadLevel2(data)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdate()
 {
     inputSystem(world)
-    destroyTileSystem(world, tileLayers, tileData)
+    // destroyTileSystem(world, tileLayers, tileData)
     playerMoveSystem(world)
     // ladderClimbingSystem(world)
     tileCountingSystem(world)
@@ -126,25 +128,6 @@ function gameUpdate()
     setCameraScale(
         clamp(cameraScale * (1-mouseWheel*0.1), 1, 1e3)
     )
-
-    /////
-    // if (mouseWasPressed(0))
-    // {
-    //     // play sound when mouse is pressed
-    //     // sound_click.play(mousePos);
-
-    //     // change particle color and set to fade out
-    //     particleEmitter.colorStartA = hsl();
-    //     particleEmitter.colorStartB = randColor();
-    //     particleEmitter.colorEndA = particleEmitter.colorStartA.scale(1,0);
-    //     particleEmitter.colorEndB = particleEmitter.colorStartB.scale(1,0);
-    // }
-
-    // // move particles to mouse location if on screen
-    // if (mousePosScreen.x)
-    //     particleEmitter.pos = mousePos;
-
-    // mainLoop()
 }
 
 ///////////////////////////////////////////////////////////////////////////////

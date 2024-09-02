@@ -2,149 +2,68 @@ import { TileLayer, TileLayerData, Vector2, getTileCollisionData, initTileCollis
 import { createPlayerByEntity as createPlayer } from "./player";
 import { world } from "./game";
 
-export const setTileData = (pos: Vector2, tileData: number[][], layer: number, data: number)=>
-    pos.arrayCheck(tileCollisionSize) && (tileData[layer][(pos.y|0)*tileCollisionSize.x+pos.x|0] = data);
+export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: number|undefined)=>
+    pos.arrayCheck(tileCollisionSize) && (tileData[(pos.y|0)*tileCollisionSize.x+pos.x|0] = data);
 
-export const getTileData = (pos: Vector2, tileData: number[][], layer: number)=>
-    pos.arrayCheck(tileCollisionSize) ? tileData[layer][(pos.y|0)*tileCollisionSize.x+pos.x|0]: 0;
-
-async function getTileMapData(link: string) {
-    const response = await fetch(link);
-    const data = await response.json();
-
-    return data;
-}
+export const getTileData = (pos: Vector2, tileData: (number|undefined)[])=>
+    pos.arrayCheck(tileCollisionSize) ? tileData[(pos.y|0)*tileCollisionSize.x+pos.x|0]: 0;
 
 export const tileData = [] as number[][]
 export const tileLayers = [] as TileLayer[]
 
-export enum TILETYPE {
-    empty = 0,
-    break = 1,
-    solid = 2,
-    ladder = 3,
-    bush = 4
-}
+export let tileData2 = [] as (number|undefined)[]
 
 export enum TILEMAP_LOOKUP {
-    bush = 7,
-    block = 3,
-    ladder = 2,
-    door = 4,
-    key = 8,
-    player = 9,
-    demon = 10,
-    blob = 11,
-    tri = 12,
-    spike = 13,
-    fireball = 14
+    BREAK,
+    LADDER,
+    BLOCK,
+    DOOR,
+    BUSH = 7,
+    KEY,
+    WIZARD
 }
 
-export const destroyTile = (_pos: Vector2, _tileLayers: TileLayer[], _tileData: number[][]) => {
+export const loadLevel2 = (_data: (number|undefined)[], _tileLayers: TileLayer[] = tileLayers) => {
+    const levelSize = vec2(30, 50)
+    initTileCollision(levelSize)
+    _tileLayers.push(new TileLayer(vec2(), levelSize, tile(0,16)))
+    tileData2 = _data.slice()
+
+    for(let x = levelSize.x; x--;) {
+        for(let y = levelSize.y; y--;) {
+            const posT = vec2(x, levelSize.y-1-y);
+            const tileNum = _data[y*levelSize.x + x];
+            if(!tileNum) continue
+            if(tileNum == TILEMAP_LOOKUP.WIZARD) {
+                createPlayer(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1), world)
+                continue
+            }
+            setTileCollisionData(posT, tileNum)
+            const newData = new TileLayerData(tileNum - 1, 0, false)
+            _tileLayers[0].setData(posT, newData)
+        }
+    }
+    _tileLayers[0].redraw()
+}
+
+export const destroyTile = (_pos: Vector2, _tileLayers: TileLayer[], _tileData: (number|undefined)[]) => {
     _pos = _pos.floor()
 
     // destroy tile
-    const tileType = getTileCollisionData(_pos);
-    if (!tileType) return false;
+    const tileNum = getTileCollisionData(_pos);
+    if (!tileNum) return false;
 
     // checl foreground index. hard codiing it.
     const foreGIdx = 0
     const layer =_tileLayers[foreGIdx]
-   if(tileType == TILETYPE.break) {
+   if(tileNum == TILEMAP_LOOKUP.BREAK) {
         // set and clear tile
         layer.setData(_pos, new TileLayerData, true);
-        setTileCollisionData(_pos, TILETYPE.empty);
-        setTileData(_pos, _tileData, foreGIdx, 0);
+        setTileCollisionData(_pos, 0);
+        setTileData(_pos, _tileData, undefined);
 
         return true
    }
 
    return false
-}
-
-export const loadLevel = () => {
-    getTileMapData("/gameLevelData.json").then((data) => {
-        const tm = data
-        let levelSize = vec2(tm.width, tm.height)
-        initTileCollision(levelSize)
-        // engineObjectsDestroy()
-
-        if(tm.layers) {
-            const layerCount = tm.layers.length
-            for(let i = 0; i < layerCount; i++) {
-                let layerData = tm.layers[i].data
-                tileLayers[i] = new TileLayer(vec2(), levelSize, tile(0,16));
-                tileData[i] = []
-                for(let x = levelSize.x; x--;) {
-                    for(let y = levelSize.y; y--;) {
-                        const posT = vec2(x,levelSize.y-1-y);
-                        const tileNum = layerData[y*levelSize.x + x];
-                        let tiletype
-
-                        if(tm.layers[i].name === "foreground") {
-                            if(tileNum == TILEMAP_LOOKUP.player) {
-                                createPlayer(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(TILEMAP_LOOKUP.player-1), world)
-                                continue
-                            }
-
-                            setTileData(posT, tileData, i, tileNum);
-                                
-                            tiletype = TILETYPE.empty
-
-                            if(tileNum > 0) {
-                                tiletype = TILETYPE.break
-                            }
-                            if(tileNum == TILEMAP_LOOKUP.ladder) {
-                                tiletype = TILETYPE.ladder
-                            }
-                            if(tileNum == TILEMAP_LOOKUP.block || 
-                                tileNum == TILEMAP_LOOKUP.door ||
-                                tileNum == TILEMAP_LOOKUP.key
-                            ) {
-                                tiletype = TILETYPE.solid
-                            }
-
-                            if(tiletype > 0) {
-                                setTileCollisionData(posT, tiletype)
-    
-                                const data = new TileLayerData(tileNum - 1, 0, false)
-                                tileLayers[i].setData(posT, data);
-                            }
-                        }
-
-                        if(tm.layers[i].name === "background") {
-                            setTileData(posT, tileData, i, tileNum);
-                            tiletype = TILETYPE.empty
-                            if(tileNum == TILEMAP_LOOKUP.bush) {
-                                tiletype = TILETYPE.bush
-                            }
-                            if(tiletype > 0) {
-                                const data = new TileLayerData(tileNum - 1, 0, false)
-                                tileLayers[i].setData(posT, data);
-                            }
-                        }
-
-                        if(tm.layers[i].name === "enemy") {
-                            
-                            // set the creation for your enemies
-
-                            tiletype = TILETYPE.empty
-                            if(tiletype > 0) {    
-                                const data = new TileLayerData(tileNum - 1, 0, false)
-                                tileLayers[i].setData(posT, data);
-                            }
-                        }
-
-                        
-                        
-                    }
-                }
-
-                tileLayers[i].redraw()
-                
-            }
-        }
-    })
-
-    
 }

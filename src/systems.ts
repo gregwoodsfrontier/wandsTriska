@@ -3,11 +3,11 @@ import { keyIsDown, gamepadIsDown, isUsingGamepad, gamepadStick, clamp, percent,
 import { JumpData, MoveInput, EngineObjectsComp, GroundTimer, PlayerTag, Health, DamageComp, DamageTimerComp, DeadTimerComp, DestroyTileCount, TileCount, LadderAblity } from "./components"
 import { MoveInputQueries, JumpingEntityQuery, PlayerMoveQueries, HealthEntityQuery, DamagedEntityQuery, EngineObjExitQueue, trapQuery, DestroyTileEnterQueue, TileCountQuery, LadderQuery } from "./queries"
 import { createSpikeBall } from "./enemies"
-import { destroyTile, TILETYPE } from "./level"
+import { destroyTile, TILEMAP_LOOKUP } from "./level"
 import { world } from "./game"
 
-export const removeEngineObjectsSystem = (_world: World) => {
-    for(let e of EngineObjExitQueue(_world)) {
+export const removeEngineObjectsSystem = (_w: World) => {
+    for(let e of EngineObjExitQueue(_w)) {
         EngineObjectsComp[e].destroy()
     }
 }
@@ -22,7 +22,7 @@ export const ladderClimbingSystem = (_w: World) => {
                 )
             )
             const collisiondata = getTileCollisionData(checkPos)
-            LadderAblity.isTouching[e] ||= collisiondata == TILETYPE.ladder
+            LadderAblity.isTouching[e] ||= collisiondata == TILEMAP_LOOKUP.LADDER
         }
         
         // check if character is touching ladder
@@ -54,7 +54,7 @@ export const tileCountingSystem = (_w: World) => {
     }
 }
 
-export const destroyTileSystem = (_w: World, _tileLayers: TileLayer[], _tileData: number[][]) => {
+export const destroyTileSystem = (_w: World, _tileLayers: TileLayer[], _tileData: (number|undefined)[]) => {
     for(let e of DestroyTileEnterQueue(_w)) {
         EngineObjectsComp[e].collideWithTile = (data, pos) => {
             if(data <= 0) return false
@@ -74,30 +74,30 @@ export const destroyTileSystem = (_w: World, _tileLayers: TileLayer[], _tileData
     }
 }
 
-export const handleHealthSystem = (_world: World) => {
+export const handleHealthSystem = (_w: World) => {
     const isDead = (_e: number) => {
         return Health.current[_e] <= 0
     }
 
-    for(let e of HealthEntityQuery(_world)) {
+    for(let e of HealthEntityQuery(_w)) {
         Health.current[e] = min(Health.current[e], Health.maxValue[e])
 
         if(isDead(e)) {
             DeadTimerComp[e] = new Timer()
-            removeEntity(_world, e)
+            removeEntity(_w, e)
         }
 
         if(Health.current[e] > 0 && EngineObjectsComp[e].pos.y < -9) {
-            removeEntity(_world, e)
+            removeEntity(_w, e)
         }
     }
 
 
 }
 
-export const handleDamageSystem = (_world: World) => {
-    for(let e of DamagedEntityQuery(_world)) {
-        addComponent(_world, DamageTimerComp, e)
+export const handleDamageSystem = (_w: World) => {
+    for(let e of DamagedEntityQuery(_w)) {
+        addComponent(_w, DamageTimerComp, e)
 
         DamageTimerComp[e] = new Timer()
 
@@ -111,7 +111,7 @@ export const handleDamageSystem = (_world: World) => {
             EngineObjectsComp[e].additiveColor = hsl(0, 0, 0, 0)
         }
 
-        removeComponent(_world, DamageComp, e)
+        removeComponent(_w, DamageComp, e)
     }
 }
 
@@ -122,24 +122,24 @@ export const renderTrapSystem = (_w: World) => {
     }
 }
 
-export const inputSystem = (_world: World) => {
-    for(let e of JumpingEntityQuery(_world)) {
+export const inputSystem = (_w: World) => {
+    for(let e of JumpingEntityQuery(_w)) {
         JumpData.isHoldingJump[e] = keyIsDown('ArrowUp') || gamepadIsDown(0)
     }
 
-    for (let e of MoveInputQueries(_world)) {
+    for (let e of MoveInputQueries(_w)) {
         MoveInput.x[e] = isUsingGamepad ? gamepadStick(0).x : keyIsDown("ArrowRight") ? 1 : keyIsDown("ArrowLeft") ? -1 : 0
         MoveInput.y[e] = isUsingGamepad ? gamepadStick(0).y : keyIsDown("ArrowUp") ? 1 : keyIsDown("ArrowDown") ? -1 : 0
     }
 
     if(keyWasPressed("KeyT")) {
         console.log("T debug key was pressed")
-        createSpikeBall(_world, mousePos, vec2(1, 1))
+        createSpikeBall(_w, mousePos, vec2(1, 1))
     }
 }
 
-export const handleJumpSys = (_world: World) => {
-    for(let e of JumpingEntityQuery(_world)) {
+export const handleJumpSys = (_w: World) => {
+    for(let e of JumpingEntityQuery(_w)) {
         if(!JumpData.isHoldingJump[e]) {
             JumpData.pressedJumpTimer[e].unset()
         } else if (!JumpData.wasHoldingJump[e]) {
@@ -170,8 +170,8 @@ export const handleJumpSys = (_world: World) => {
     }
 }
 
-export const playerMoveSystem = (_world: World) => {
-    for (let e of PlayerMoveQueries(_world)) {
+export const playerMoveSystem = (_w: World) => {
+    for (let e of PlayerMoveQueries(_w)) {
         EngineObjectsComp[e].velocity.x = clamp(EngineObjectsComp[e].velocity.x + MoveInput.x[e] * 0.042, -PlayerTag.maxSpeed[e], PlayerTag.maxSpeed[e])
 
         if(MoveInput.x[e]) {
