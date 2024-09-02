@@ -11,6 +11,8 @@ export const tileLayers = [] as TileLayer[]
 
 export let tileData2 = [] as (number|undefined)[]
 
+export let p: EngineObject
+
 export enum TILEMAP_LOOKUP {
     BREAK,
     LADDER,
@@ -33,7 +35,7 @@ export const loadLevel2 = (_data: (number|undefined)[], _tileLayers: TileLayer[]
             const tileNum = _data[y*levelSize.x + x];
             if(!tileNum) continue
             if(tileNum == TILEMAP_LOOKUP.WIZARD) {
-                const p = new EngineObject(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1))
+                p = new EngineObject(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1))
                 p.setCollision(true, true)
                 // createPlayer(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1), world)
                 continue

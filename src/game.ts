@@ -13,9 +13,12 @@ import {
     cameraScale,
     mouseWheel,
     tileCollisionSize,
+    setCameraPos,
+    timeDelta,
 } from 'littlejsengine'
-import { loadLevel2 } from './level';
+import { loadLevel2, p } from './level';
 import { data } from './tileLayerData';
+import { addComp, addEntity, addSys, ecsUpdate, getComp, w } from './microEcs';
 
 // Create a world
 
@@ -29,6 +32,9 @@ setShowSplashScreen(false);
 
 // game variables
 // let particleEmitter: ParticleEmitter;
+
+let e1: number
+let e2: number
 
 const gameParams = {
     score: 0,
@@ -45,6 +51,9 @@ function initParams() {
     setCameraScale(64)
 }
 
+const posComp = (x = 0, y = 0) => ({ x, y });
+const velComp = (vx = 0, vy = 0) => ({ vx, vy });
+
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
@@ -53,11 +62,31 @@ function gameInit()
 
     // loadLevel()
     loadLevel2(data)
+
+    setCameraPos(p.pos)
+
+    addSys(['pos', 'vel'], (e:number, dt:number) => {
+        const p = getComp(e, 'pos'), v = getComp(e, 'vel');
+        p.x += v.vx * dt; p.y += v.vy * dt;
+    });
+
+    e1 = addEntity();
+    addComp(e1, 'pos', posComp(1, 2));
+    addComp(e1, 'vel', velComp(0.1, 0.1));
+
+    e2 = addEntity();
+    addComp(e2, 'pos', posComp(10, 20));
+    // addComp(e2, 'vel', velComp(0.1, 0.1));
+
+    console.log(w.ents)
+    console.log(w.comps)
+    console.log(w.sys)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdate()
 {
+    ecsUpdate(timeDelta)
 
     setCameraScale(
         clamp(cameraScale * (1-mouseWheel*0.1), 1, 1e3)
@@ -93,7 +122,8 @@ function gameRenderPost()
         overlayContext.fillText(text, x, y);
     }
 
-    drawText('Deaths: 0', overlayCanvas.width*3/4, 20);
+    drawText('PosX e1: ' + getComp(e1, 'pos').x, overlayCanvas.width*1/4, 20);
+    drawText('PosX e2: '  + getComp(e2, 'pos').x, overlayCanvas.width*3/4, 20);
     
 }
 
