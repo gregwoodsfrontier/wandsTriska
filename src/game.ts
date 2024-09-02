@@ -13,8 +13,12 @@ import {
     cameraScale,
     mouseWheel,
     tileCollisionSize,
+    EngineObject,
+    setCameraPos,
+    mouseWasPressed,
+    mousePos,
 } from 'littlejsengine'
-import { loadLevel2 } from './level';
+import { addTile, loadLevel, TILEMAP_LOOKUP } from './level';
 import { data } from './tileLayerData';
 
 // Create a world
@@ -35,6 +39,8 @@ const gameParams = {
     deaths: 0
 }
 
+const ent = [] as EngineObject[]
+
 function initParams() {
     // init game
     gameParams.score = 0
@@ -48,20 +54,23 @@ function initParams() {
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
+    // loadLevel()
+    loadLevel(data, ent)
     // init game with params and configs
     initParams()
-
-    // loadLevel()
-    loadLevel2(data)
+    setCameraPos(ent[0].pos)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdate()
 {
-
     setCameraScale(
         clamp(cameraScale * (1-mouseWheel*0.1), 1, 1e3)
     )
+
+    if(mouseWasPressed(0)) {
+        addTile(mousePos, TILEMAP_LOOKUP.BREAK)
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,4 +108,4 @@ function gameRenderPost()
 
 ///////////////////////////////////////////////////////////////////////////////
 // Startup LittleJS Engine
-engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRenderPost, ['tiles.png']);
+engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRenderPost, ['t2com.png']);
