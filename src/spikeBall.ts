@@ -6,7 +6,7 @@ export default class SpikeBall extends EngineObject {
         super(_pos, _size, tile(TILEMAP_LOOKUP.SPIKEBALL-1))
         this.name = "spikeball"
         this.setCollision(true, true)
-        this.elasticity = 0.8
+        this.elasticity = 1.01
         this.groundTimer = new Timer()
         this.airTimer = new Timer()
         this.destroyCooldown = new Timer()
@@ -15,7 +15,7 @@ export default class SpikeBall extends EngineObject {
         this.velocity = vec2(
             rand(-1, 1),
             1
-        ).normalize(0.5)
+        ).normalize(1)
     }
 
     name: string
@@ -45,17 +45,15 @@ export default class SpikeBall extends EngineObject {
 
         let state_obj = destroyTile(pos, this.destroyCooldown)
         this.destroyCooldown = state_obj.cd
-
-        console.log('collide')
-
+        
         if(state_obj.ch) {
             this.destroyedTilesN++
             if(pos.y < this.pos.y) {
-                this.velocity.add(vec2(1, 0)).normalize(0.5)
+                this.velocity.add(vec2(1, 0)).normalize(0.75)
             }
         }
 
-        if(this.destroyedTilesN > 1) {
+        if(this.destroyedTilesN > 4) {
             this.destroy()
         }
 
