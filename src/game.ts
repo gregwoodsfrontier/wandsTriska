@@ -69,7 +69,8 @@ function gameUpdate()
     )
 
     if(mouseWasPressed(0)) {
-        new SpikeBall(mousePos, vec2(1, 1))
+        // new SpikeBall(mousePos, vec2(1, 1))
+        addTile(mousePos, TILEMAP_LOOKUP.BLOCK)
     }
 }
 
@@ -83,7 +84,7 @@ function gameUpdatePost()
 function gameRender()
 {
     // draw a grey square in the background without using webgl
-    drawRect(tileCollisionSize.divide(vec2(2,2)), tileCollisionSize, hsl(0,0,.6), 0, false)
+    drawRect(tileCollisionSize.divide(vec2(2,2)), vec2(100, 100), hsl(0,0,.6), 0, false)
     
 }
 

@@ -22,7 +22,8 @@ export enum TILEMAP_LOOKUP {
 }
 
 export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] = tileLayers, _tileData = tileData2) => {
-    const levelSize = vec2(30, 10)
+    // need to set the level size first.
+    const levelSize = vec2(30, 10+20)
     initTileCollision(levelSize)
     _tileLayers.push(new TileLayer(vec2(), levelSize, tile(0,16)))
     for(let i = 0; i < _data.length; i++) {
@@ -35,7 +36,7 @@ export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] 
             const tileNum = _data[y*levelSize.x + x];
             if(!tileNum) continue
             if(tileNum == TILEMAP_LOOKUP.WIZARD) {
-                new Player(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1))
+                new Player(posT.add(vec2(0,2)), vec2(0.6, 0.95), tile(tileNum-1))
                 // createPlayer(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1), world)
                 continue
             }
@@ -46,6 +47,8 @@ export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] 
     }
     _tileLayers[0].redraw()
     _tileLayers[0].renderOrder = 1e3
+
+    addRowTile()
 }
 
 export const addTile = (_pos: Vector2, _tileNum: number, _tileLayers = tileLayers, _tileData = tileData2) => {
@@ -55,6 +58,19 @@ export const addTile = (_pos: Vector2, _tileNum: number, _tileLayers = tileLayer
     setTileData(_pos, _tileData, _tileNum)
     setTileCollisionData(_pos, _tileNum)
     _tileLayers[0].redraw()
+}
+
+export const addRowTile = () => {
+    // setTileCollisionSize(tileCollisionSize.add(vec2(0, 1)))
+    for(let i = 0; i < tileCollisionSize.x; i++) {
+        let pos = vec2(i, 10+20-11)
+        if(i == 0 || i == tileCollisionSize.x-1) {
+            addTile(pos, TILEMAP_LOOKUP.BLOCK)
+        } else {
+            addTile(pos, TILEMAP_LOOKUP.BREAK)
+        }
+    }
+    // tileLayers[0].redraw()
 }
 
 export const destroyTile = (_pos: Vector2, _timer: Timer, _tileLayers = tileLayers, _tileData = tileData2) => {
