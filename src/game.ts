@@ -17,9 +17,11 @@ import {
     setCameraPos,
     mouseWasPressed,
     mousePos,
+    engineObjects,
 } from 'littlejsengine'
 import { addTile, loadLevel, TILEMAP_LOOKUP } from './level';
 import { data } from './tileLayerData';
+import SpikeBall from './spikeBall';
 
 // Create a world
 
@@ -39,8 +41,6 @@ const gameParams = {
     deaths: 0
 }
 
-const ent = [] as EngineObject[]
-
 function initParams() {
     // init game
     gameParams.score = 0
@@ -55,10 +55,10 @@ function initParams() {
 function gameInit()
 {
     // loadLevel()
-    loadLevel(data, ent)
+    loadLevel(data)
     // init game with params and configs
     initParams()
-    setCameraPos(ent[0].pos)
+    setCameraPos(engineObjects.filter(e => e.name === 'player')[0].pos)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ function gameUpdate()
     )
 
     if(mouseWasPressed(0)) {
-        addTile(mousePos, TILEMAP_LOOKUP.BREAK)
+        new SpikeBall(mousePos, vec2(1, 1))
     }
 }
 

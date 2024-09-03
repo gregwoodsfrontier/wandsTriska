@@ -1,4 +1,4 @@
-import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown } from "littlejsengine";
+import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, tileCollision, tileCollisionSize } from "littlejsengine";
 
 const airControlSystem = (_gnT: Timer, _mov: Vector2, _vel: Vector2) => {
     if(_gnT && !_gnT.isSet()) {
@@ -93,5 +93,9 @@ export default class Player extends EngineObject {
         this.moveInput = airControlSystem(this.groundTimer, this. moveInput, this.velocity)
         this.velocity = playerMoveSys(this.moveInput, this.velocity, this.maxSpeed, this.mirror)
         this.mirror = mirrorHandling(this.moveInput, this.mirror)
+
+        // if(this.pos.y < (tileCollisionSize.y - 3)) {
+        //     this.destroy()
+        // }
     }
 }

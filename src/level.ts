@@ -1,4 +1,4 @@
-import { EngineObject, TileLayer, TileLayerData, Vector2, getTileCollisionData, initTileCollision, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
+import { EngineObject, TileLayer, TileLayerData, Timer, Vector2, getTileCollisionData, initTileCollision, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
 import Player from "./player";
 
 export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: number|undefined)=>
@@ -9,17 +9,19 @@ export const getTileData = (pos: Vector2, tileData: (number|undefined)[])=>
 
 export const tileLayers = [] as TileLayer[]
 
-export let tileData2 = [] as (number|undefined)[]
+export const tileData2 = [] as (number|undefined)[]
 
 export enum TILEMAP_LOOKUP {
     BREAK = 1,
     BLOCK,
     DOOR,
     KEY = 5,
-    WIZARD
+    WIZARD,
+    BLOB,
+    SPIKEBALL
 }
 
-export const loadLevel = (_data: (number|undefined)[],  _ent: EngineObject[], _tileLayers: TileLayer[] = tileLayers, _tileData = tileData2) => {
+export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] = tileLayers, _tileData = tileData2) => {
     const levelSize = vec2(30, 10)
     initTileCollision(levelSize)
     _tileLayers.push(new TileLayer(vec2(), levelSize, tile(0,16)))
@@ -33,8 +35,7 @@ export const loadLevel = (_data: (number|undefined)[],  _ent: EngineObject[], _t
             const tileNum = _data[y*levelSize.x + x];
             if(!tileNum) continue
             if(tileNum == TILEMAP_LOOKUP.WIZARD) {
-                const p = new Player(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1))
-                _ent.push(p)
+                new Player(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1))
                 // createPlayer(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1), world)
                 continue
             }
@@ -56,24 +57,25 @@ export const addTile = (_pos: Vector2, _tileNum: number, _tileLayers = tileLayer
     _tileLayers[0].redraw()
 }
 
-export const destroyTile = (_pos: Vector2, _tileLayers: TileLayer[], _tileData: (number|undefined)[]) => {
+export const destroyTile = (_pos: Vector2, _timer: Timer, _tileLayers = tileLayers, _tileData = tileData2) => {
     _pos = _pos.floor()
 
     // destroy tile
     const tileNum = getTileCollisionData(_pos);
-    if (!tileNum) return false;
+    if (!tileNum) return {ch: false, cd: _timer};
 
     // checl foreground index. hard codiing it.
-    const foreGIdx = 0
-    const layer =_tileLayers[foreGIdx]
-   if(tileNum == TILEMAP_LOOKUP.BREAK) {
+    const layer =_tileLayers[0]
+   if(tileNum == TILEMAP_LOOKUP.BREAK && !_timer.active()) {
         // set and clear tile
         layer.setData(_pos, new TileLayerData, true);
         setTileCollisionData(_pos, 0);
         setTileData(_pos, _tileData, undefined);
 
-        return true
+        _timer.set(0.5)
+
+        return {ch: true, cd: _timer}
    }
 
-   return false
+   return {ch: false, cd: _timer}
 }
