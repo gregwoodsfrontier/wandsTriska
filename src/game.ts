@@ -14,12 +14,10 @@ import {
     mouseWheel,
     tileCollisionSize,
     setCameraPos,
-    mouseWasPressed,
-    mousePos,
     engineObjects,
     Vector2,
 } from 'littlejsengine'
-import { addTile, loadLevel, tileLayers, TILEMAP_LOOKUP } from './level';
+import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import SpikeBall from './spikeBall';
 

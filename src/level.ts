@@ -1,6 +1,5 @@
-import { EngineObject, TileLayer, TileLayerData, Timer, Vector2, getTileCollisionData, initTileCollision, randInt, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
+import { TileLayer, TileLayerData, Timer, Vector2, getTileCollisionData, initTileCollision, randInt, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
 import Player from "./player";
-import SpikeBall from "./spikeBall";
 import { spawnSpikeBall } from "./game";
 
 export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: number|undefined)=>

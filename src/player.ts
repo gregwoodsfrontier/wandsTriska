@@ -1,5 +1,4 @@
-import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, tileCollision, tileCollisionSize, getTileCollisionData, ASSERT } from "littlejsengine";
-import SpikeBall from "./spikeBall";
+import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT } from "littlejsengine";
 import { incrementTotSteps, spawnSpikeBall } from "./game";
 
 const airControlSystem = (_gnT: Timer, _mov: Vector2, _vel: Vector2) => {
