@@ -1,4 +1,4 @@
-import { EngineObject, TileLayer, TileLayerData, Timer, Vector2, getTileCollisionData, initTileCollision, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
+import { EngineObject, TileLayer, TileLayerData, Timer, Vector2, getTileCollisionData, initTileCollision, randInt, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
 import Player from "./player";
 
 export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: number|undefined)=>
@@ -10,6 +10,8 @@ export const getTileData = (pos: Vector2, tileData: (number|undefined)[])=>
 export const tileLayers = [] as TileLayer[]
 
 export const tileData2 = [] as (number|undefined)[]
+
+export const maxAddHeight = 50
 
 export enum TILEMAP_LOOKUP {
     BREAK = 1,
@@ -23,7 +25,7 @@ export enum TILEMAP_LOOKUP {
 
 export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] = tileLayers, _tileData = tileData2) => {
     // need to set the level size first.
-    const levelSize = vec2(30, 10+20)
+    const levelSize = vec2(30, 10+maxAddHeight)
     initTileCollision(levelSize)
     _tileLayers.push(new TileLayer(vec2(), levelSize, tile(0,16)))
     for(let i = 0; i < _data.length; i++) {
@@ -36,8 +38,7 @@ export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] 
             const tileNum = _data[y*levelSize.x + x];
             if(!tileNum) continue
             if(tileNum == TILEMAP_LOOKUP.WIZARD) {
-                new Player(posT.add(vec2(0,2)), vec2(0.6, 0.95), tile(tileNum-1))
-                // createPlayer(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1), world)
+                new Player(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1))
                 continue
             }
             setTileCollisionData(posT, tileNum)
@@ -45,10 +46,20 @@ export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] 
             _tileLayers[0].setData(posT, newData)
         }
     }
+
+    for(let i = 0; i < maxAddHeight - 1; i++) {
+        if(i === maxAddHeight - 2) {
+            addRandomRowTile(i, 0, true)
+        } else {
+            const rando = randInt(10, 25)
+            addRandomRowTile(i, rando, false)
+        }
+    }
+
     _tileLayers[0].redraw()
     _tileLayers[0].renderOrder = 1e3
 
-    addRowTile()
+    
 }
 
 export const addTile = (_pos: Vector2, _tileNum: number, _tileLayers = tileLayers, _tileData = tileData2) => {
@@ -57,13 +68,34 @@ export const addTile = (_pos: Vector2, _tileNum: number, _tileLayers = tileLayer
     layer.setData(_pos, new TileLayerData(_tileNum-1), true)
     setTileData(_pos, _tileData, _tileNum)
     setTileCollisionData(_pos, _tileNum)
-    _tileLayers[0].redraw()
+    // _tileLayers[0].redraw()
 }
 
-export const addRowTile = () => {
-    // setTileCollisionSize(tileCollisionSize.add(vec2(0, 1)))
+export const addRandomRowTile = (_addedRows: number, _probBl: number, _allBlk: boolean) => {
+    if(_probBl<0 || _probBl>100) throw new Error("probability of block tiles should be within 0 and 100")
     for(let i = 0; i < tileCollisionSize.x; i++) {
-        let pos = vec2(i, 10+20-11)
+        let pos = vec2(i, maxAddHeight - _addedRows)
+        if(i == 0 || i == tileCollisionSize.x-1) {
+            addTile(pos, TILEMAP_LOOKUP.BLOCK)
+        } else {
+            if(_allBlk) {
+                addTile(pos, TILEMAP_LOOKUP.BLOCK)
+            } else {
+                const rand = randInt(0, 100)
+                if(rand>0 && rand<_probBl) {
+                    addTile(pos, TILEMAP_LOOKUP.BLOCK)
+                } else {
+                    addTile(pos, TILEMAP_LOOKUP.BREAK)
+                }
+            }
+        }
+    }
+    // tileLayers[0].redraw()
+}
+
+export const addRowTile = (_addedRows: number) => {
+    for(let i = 0; i < tileCollisionSize.x; i++) {
+        let pos = vec2(i, maxAddHeight - _addedRows)
         if(i == 0 || i == tileCollisionSize.x-1) {
             addTile(pos, TILEMAP_LOOKUP.BLOCK)
         } else {

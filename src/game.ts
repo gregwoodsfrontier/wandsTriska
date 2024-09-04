@@ -19,7 +19,7 @@ import {
     mousePos,
     engineObjects,
 } from 'littlejsengine'
-import { addTile, loadLevel, TILEMAP_LOOKUP } from './level';
+import { addTile, loadLevel, tileLayers, TILEMAP_LOOKUP } from './level';
 import { data } from './tileLayerData';
 import SpikeBall from './spikeBall';
 
@@ -71,6 +71,7 @@ function gameUpdate()
     if(mouseWasPressed(0)) {
         // new SpikeBall(mousePos, vec2(1, 1))
         addTile(mousePos, TILEMAP_LOOKUP.BLOCK)
+        tileLayers[0].redraw()
     }
 }
 
