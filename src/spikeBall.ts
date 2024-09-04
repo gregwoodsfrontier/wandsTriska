@@ -1,21 +1,21 @@
-import { EngineObject, Vector2, vec2, Timer, tile, rand, tileCollisionSize } from "littlejsengine";
+import { EngineObject, Vector2, vec2, Timer, tile, rand } from "littlejsengine";
 import { destroyTile, TILEMAP_LOOKUP } from "./level";
 
 export default class SpikeBall extends EngineObject {
-    constructor(_pos: Vector2, _size: Vector2) {
-        super(_pos, _size, tile(TILEMAP_LOOKUP.SPIKEBALL-1))
+    constructor(_pos: Vector2) {
+        super(_pos, vec2(1, 1), tile(TILEMAP_LOOKUP.SPIKEBALL-1))
         this.name = "spikeball"
         this.setCollision(true, true)
-        this.elasticity = 1.01
+        this.elasticity = 0.9
         this.groundTimer = new Timer()
         this.airTimer = new Timer()
         this.destroyCooldown = new Timer()
         this.destroyedTilesN = 0
 
         this.velocity = vec2(
-            rand(-1, 1),
-            1
-        ).normalize(1)
+            1,
+            rand(-2, 2)
+        ).normalize(0.5)
     }
 
     name: string
@@ -24,20 +24,24 @@ export default class SpikeBall extends EngineObject {
     destroyCooldown: Timer
     destroyedTilesN: number
 
+    destroyWhenStillOnGnd() {
+        if(!this.groundTimer.active() && this.getAliveTime() > 13) {
+            this.destroy()
+        }
+    }
+
     update() {
         super.update()
 
         if(this.groundObject) {
-            this.groundTimer.set()
+            this.groundTimer.set(2)
             this.airTimer.unset()
         } else {
             this.groundTimer.unset()
             this.airTimer.set()
         }
 
-        // if(this.pos.y < (tileCollisionSize.y - 3)) {
-        //     this.destroy()
-        // }
+        this.destroyWhenStillOnGnd()
     }
 
     collideWithTile(tileData: number, pos: Vector2): boolean {
@@ -53,7 +57,7 @@ export default class SpikeBall extends EngineObject {
             }
         }
 
-        if(this.destroyedTilesN > 4) {
+        if(this.destroyedTilesN > 26) {
             this.destroy()
         }
 

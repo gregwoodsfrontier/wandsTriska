@@ -13,11 +13,11 @@ import {
     cameraScale,
     mouseWheel,
     tileCollisionSize,
-    EngineObject,
     setCameraPos,
     mouseWasPressed,
     mousePos,
     engineObjects,
+    Vector2,
 } from 'littlejsengine'
 import { addTile, loadLevel, tileLayers, TILEMAP_LOOKUP } from './level';
 import { data } from './tileLayerData';
@@ -36,15 +36,24 @@ setShowSplashScreen(false);
 // game variables
 // let particleEmitter: ParticleEmitter;
 
-const gameParams = {
-    score: 0,
-    deaths: 0
+export const gameData = {
+    numOfSpikeBalls: 0,
+    totalSteps: 0
+}
+
+export const spawnSpikeBall = (_pos: Vector2) => {
+    new SpikeBall(_pos)
+    gameData.numOfSpikeBalls++
+}
+
+export const incrementTotSteps = () => {
+    gameData.totalSteps++
 }
 
 function initParams() {
     // init game
-    gameParams.score = 0
-    gameParams.deaths = 0
+    gameData.numOfSpikeBalls = 0
+    gameData.totalSteps = 0
     setGravity(-.01)
     setObjectDefaultAngleDamping(.99)
     setObjectDefaultDamping(.99)
@@ -54,10 +63,11 @@ function initParams() {
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
+    initParams()
     // loadLevel()
     loadLevel(data)
     // init game with params and configs
-    initParams()
+   
     setCameraPos(engineObjects.filter(e => e.name === 'player')[0].pos)
 }
 
@@ -67,12 +77,6 @@ function gameUpdate()
     setCameraScale(
         clamp(cameraScale * (1-mouseWheel*0.1), 1, 1e3)
     )
-
-    if(mouseWasPressed(0)) {
-        // new SpikeBall(mousePos, vec2(1, 1))
-        addTile(mousePos, TILEMAP_LOOKUP.BLOCK)
-        tileLayers[0].redraw()
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,7 +108,8 @@ function gameRenderPost()
         overlayContext.fillText(text, x, y);
     }
 
-    drawText('Deaths: 0', overlayCanvas.width*3/4, 20);
+    drawText('Steps: '+gameData.totalSteps, overlayCanvas.width*1/4, 20);
+    drawText('Spawned Spikes: '+gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
     
 }
 

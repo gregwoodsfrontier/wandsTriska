@@ -1,4 +1,6 @@
-import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, tileCollision, tileCollisionSize } from "littlejsengine";
+import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, tileCollision, tileCollisionSize, getTileCollisionData, ASSERT } from "littlejsengine";
+import SpikeBall from "./spikeBall";
+import { incrementTotSteps, spawnSpikeBall } from "./game";
 
 const airControlSystem = (_gnT: Timer, _mov: Vector2, _vel: Vector2) => {
     if(_gnT && !_gnT.isSet()) {
@@ -38,6 +40,9 @@ export default class Player extends EngineObject {
         this.groundTimer = new Timer()
         this.pressedJumpTimer = new Timer()
         this.jumpTimer = new Timer()
+        this.prePos = this.pos.copy()
+        this.countTile = 0
+        this.countTileCooldown = new Timer()
     }
 
     name: string
@@ -48,12 +53,51 @@ export default class Player extends EngineObject {
     jumpTimer: Timer
     holdingJump = false
     wasHoldJump = false
+    prePos: Vector2
+    countTile: number
+    countTileCooldown: Timer
+
+    get getCountTile() {
+        return this.countTile
+    }
 
     inputSystem() {
         this.moveInput = isUsingGamepad ? gamepadStick(0) : vec2(keyIsDown('ArrowRight')?1:0 - (keyIsDown('ArrowLeft')?1:0), 
         keyIsDown('ArrowUp')?1:0 - (keyIsDown('ArrowDown')?1:0));
 
         this.holdingJump   = keyIsDown('ArrowUp') || gamepadIsDown(0);
+    }
+
+    countTilesFunc() {
+        if(Math.floor(this.prePos.x) === Math.floor(this.pos.x) || this.countTileCooldown.active() || !this.groundTimer.active()) return
+        if(!this.countTileCooldown.active()) {
+            if(this.countTile > 12) {
+                this.trigger()
+                this.countTile = 0
+            } else {
+                this.countTile++
+                incrementTotSteps()
+                console.log(`countile: `, this.countTile)
+            }
+            this.countTileCooldown.set(0.5)
+        }
+        this.prePos.x = this.pos.x
+    }
+
+    trigger() {
+        const spawnPos = this.pos.floor().add(vec2(-2, 2))
+        const range = 4
+        for(let i = range; i--;) {
+            if(!getTileCollisionData(spawnPos.add(vec2(i, 0)))) {
+                 // spawn a spikeball
+                spawnSpikeBall(spawnPos.add(vec2(i, 0)))
+                return
+            }
+            else {
+                ASSERT(false, "there is tile in spawn position")
+            }
+        }
+       
     }
 
     jumpHandling() {
@@ -90,6 +134,7 @@ export default class Player extends EngineObject {
 
         this.inputSystem()
         this.jumpHandling()
+        this.countTilesFunc()
         this.moveInput = airControlSystem(this.groundTimer, this. moveInput, this.velocity)
         this.velocity = playerMoveSys(this.moveInput, this.velocity, this.maxSpeed, this.mirror)
         this.mirror = mirrorHandling(this.moveInput, this.mirror)
