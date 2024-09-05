@@ -1,10 +1,7 @@
 import {
     engineInit, setShowSplashScreen,
-    vec2,
-    hsl,
     setCameraScale,
     setGravity,
-    drawRect,
     overlayContext,
     overlayCanvas,
     clamp,
@@ -12,7 +9,6 @@ import {
     setObjectDefaultDamping,
     cameraScale,
     mouseWheel,
-    tileCollisionSize,
     setCameraPos,
     engineObjects,
     Vector2,
