@@ -20,6 +20,7 @@ import {
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import SpikeBall from './spikeBall';
+import Sky from './sky';
 
 // Create a world
 
@@ -48,6 +49,8 @@ export const incrementTotSteps = () => {
     gameData.totalSteps++
 }
 
+let sky: Sky
+
 function initParams() {
     // init game
     gameData.numOfSpikeBalls = 0
@@ -62,9 +65,10 @@ function initParams() {
 function gameInit()
 {
     initParams()
-    // loadLevel()
     loadLevel(data)
-    // init game with params and configs
+
+    // create sky
+    sky = new Sky()
    
     setCameraPos(engineObjects.filter(e => e.name === 'player')[0].pos)
 }
@@ -86,8 +90,6 @@ function gameUpdatePost()
 ///////////////////////////////////////////////////////////////////////////////
 function gameRender()
 {
-    // draw a grey square in the background without using webgl
-    drawRect(tileCollisionSize.divide(vec2(2,2)), vec2(100, 100), hsl(0,0,.6), 0, false)
     
 }
 

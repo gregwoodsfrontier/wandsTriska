@@ -1,5 +1,6 @@
 import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT } from "littlejsengine";
 import { incrementTotSteps, spawnSpikeBall } from "./game";
+import { SE } from "./effects";
 
 const airControlSystem = (_gnT: Timer, _mov: Vector2, _vel: Vector2) => {
     if(_gnT && !_gnT.isSet()) {
@@ -76,7 +77,6 @@ export default class Player extends EngineObject {
             } else {
                 this.countTile++
                 incrementTotSteps()
-                console.log(`countile: `, this.countTile)
             }
             this.countTileCooldown.set(0.5)
         }
@@ -111,6 +111,7 @@ export default class Player extends EngineObject {
             if(this.pressedJumpTimer.active() && ! this.jumpTimer.active()) {
                 this.velocity.y = .15;
                 this.jumpTimer.set(.2)
+                SE.JUMP.play()
             }
         }
 

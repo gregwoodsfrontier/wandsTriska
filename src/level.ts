@@ -1,6 +1,7 @@
 import { TileLayer, TileLayerData, Timer, Vector2, getTileCollisionData, initTileCollision, randInt, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
 import Player from "./player";
 import { spawnSpikeBall } from "./game";
+import { makeDeb, PALLETE, SE } from "./effects";
 
 export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: number|undefined)=>
     pos.arrayCheck(tileCollisionSize) && (tileData[(pos.y|0)*tileCollisionSize.x+pos.x|0] = data);
@@ -12,7 +13,7 @@ export const tileLayers = [] as TileLayer[]
 
 export const tileData2 = [] as (number|undefined)[]
 
-export const maxAddHeight = 50
+export const maxAddHeight = 30
 
 export enum TILEMAP_LOOKUP {
     BREAK = 1,
@@ -127,6 +128,9 @@ export const destroyTile = (_pos: Vector2, _timer: Timer, _tileLayers = tileLaye
         layer.setData(_pos, new TileLayerData, true);
         setTileCollisionData(_pos, 0);
         setTileData(_pos, _tileData, undefined);
+
+        SE.TILE_EXPLODE.play()
+        makeDeb(_pos, PALLETE.YELLOW)
 
         _timer.set(0.5)
 

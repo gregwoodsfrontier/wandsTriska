@@ -1,5 +1,6 @@
 import { EngineObject, Vector2, vec2, Timer, tile, rand } from "littlejsengine";
 import { destroyTile, TILEMAP_LOOKUP } from "./level";
+import { makeDeb, PALLETE, SE } from "./effects";
 
 export default class SpikeBall extends EngineObject {
     constructor(_pos: Vector2) {
@@ -24,9 +25,15 @@ export default class SpikeBall extends EngineObject {
     destroyCooldown: Timer
     destroyedTilesN: number
 
+    kill() {
+        makeDeb(this.pos, PALLETE.RED)
+        SE.SPIK_EXPLODE.play()
+        this.destroy()
+    }
+
     destroyWhenStillOnGnd() {
         if(!this.groundTimer.active() && this.getAliveTime() > 13) {
-            this.destroy()
+            this.kill()
         }
     }
 
@@ -58,7 +65,7 @@ export default class SpikeBall extends EngineObject {
         }
 
         if(this.destroyedTilesN > 26) {
-            this.destroy()
+            this.kill()
         }
 
         return true
