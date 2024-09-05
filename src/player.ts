@@ -1,37 +1,146 @@
-import { World, addEntity, addComponent } from "bitecs"
-import { Vector2, TileInfo, Timer, EngineObject, vec2 } from "littlejsengine"
-import { PlayerTag, MoveInput, Health, JumpData, GroundTimer, EOC, TileCount} from "./components"
+import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT } from "littlejsengine";
+import { incrementTotSteps, spawnSpikeBall } from "./game";
+import { SE } from "./effects";
 
-export const createPlayerByEntity = (_pos: Vector2, _size: Vector2, _tile: TileInfo, _world: World) => {
-    const e = addEntity(_world)
-    const comps = [PlayerTag, MoveInput, Health, JumpData, GroundTimer, EOC, TileCount]
-
-    for(let i = 0; i < comps.length; i++) {
-        addComponent(_world, comps[i], e)
+const airControlSystem = (_gnT: Timer, _mov: Vector2, _vel: Vector2) => {
+    if(_gnT && !_gnT.isSet()) {
+        if (sign(_mov.x) == sign(_vel.x))
+            _mov.x *= .1; // moving with velocity
+        else
+            _mov.x *= .2; // moving against velocity (stopping)
     }
 
-    Health.maxValue[e] = 5
-    Health.current[e] = Health.maxValue[e]
+    return _mov
+}
 
-    PlayerTag.maxSpeed[e] = 0.2
+const playerMoveSys = (_move: Vector2, _vel: Vector2, _max: number, _mir: boolean) => {
+    _vel.x = clamp(
+        _vel.x + _move.x * 0.042,
+        -_max,
+        _max
+    )
 
-    MoveInput.x[e] = 0
-    MoveInput.y[e] = 0
+    return _vel
+}
 
-    JumpData.isHoldingJump[e] = false
-    JumpData.wasHoldingJump[e] = false
-    JumpData.jumpTimer[e] = new Timer
-    JumpData.pressedJumpTimer[e] = new Timer
-    JumpData.vel[e] = 0.25
+const mirrorHandling = (_mv: Vector2, _mir: boolean) => {
+    if(_mv.x) {
+        _mir = _mv.x < 0
+    }
 
-    GroundTimer[e] = new Timer
+    return _mir
+}
 
-    EOC[e] = new EngineObject(_pos, _size, _tile)
+export default class Player extends EngineObject {
+    constructor(_pos: Vector2, _size: Vector2, _tile: TileInfo) {
+        super(_pos, _size, _tile)
+        this.name = "player"
+        this.drawSize = vec2(1, 1)
+        this.setCollision(true, true)
+        this.groundTimer = new Timer()
+        this.pressedJumpTimer = new Timer()
+        this.jumpTimer = new Timer()
+        this.prePos = this.pos.copy()
+        this.countTile = 0
+        this.countTileCooldown = new Timer()
+    }
 
-    EOC[e].drawSize = vec2(1, 1)
-    EOC[e].setCollision(true, false, true)
+    name: string
+    moveInput = vec2(0, 0)
+    maxSpeed = 0.25
+    groundTimer: Timer
+    pressedJumpTimer: Timer
+    jumpTimer: Timer
+    holdingJump = false
+    wasHoldJump = false
+    prePos: Vector2
+    countTile: number
+    countTileCooldown: Timer
 
-    TileCount.current[e] = 0
-    TileCount.prePosX[e] = EOC[e].pos.x
-    TileCount.trigger[e] = 12
+    get getCountTile() {
+        return this.countTile
+    }
+
+    inputSystem() {
+        this.moveInput = isUsingGamepad ? gamepadStick(0) : vec2(keyIsDown('ArrowRight')?1:0 - (keyIsDown('ArrowLeft')?1:0), 
+        keyIsDown('ArrowUp')?1:0 - (keyIsDown('ArrowDown')?1:0));
+
+        this.holdingJump   = keyIsDown('ArrowUp') || gamepadIsDown(0);
+    }
+
+    countTilesFunc() {
+        if(Math.floor(this.prePos.x) === Math.floor(this.pos.x) || this.countTileCooldown.active() || !this.groundTimer.active()) return
+        if(!this.countTileCooldown.active()) {
+            if(this.countTile > 12) {
+                this.trigger()
+                this.countTile = 0
+            } else {
+                this.countTile++
+                incrementTotSteps()
+            }
+            this.countTileCooldown.set(0.5)
+        }
+        this.prePos.x = this.pos.x
+    }
+
+    trigger() {
+        const spawnPos = this.pos.floor().add(vec2(-2, 2))
+        const range = 4
+        for(let i = range; i--;) {
+            if(!getTileCollisionData(spawnPos.add(vec2(i, 0)))) {
+                 // spawn a spikeball
+                spawnSpikeBall(spawnPos.add(vec2(i, 0)))
+                return
+            }
+            else {
+                ASSERT(false, "there is tile in spawn position")
+            }
+        }
+       
+    }
+
+    jumpHandling() {
+        if(!this.holdingJump) {
+            this.pressedJumpTimer.unset()
+        } else if (!this.wasHoldJump) {
+            this.pressedJumpTimer.set(0.3)
+        }
+        this.wasHoldJump = this.holdingJump
+
+        if(this.groundTimer.active()) {
+            if(this.pressedJumpTimer.active() && ! this.jumpTimer.active()) {
+                this.velocity.y = .15;
+                this.jumpTimer.set(.2)
+                SE.JUMP.play()
+            }
+        }
+
+        if(this.jumpTimer.active()) {
+            this.groundTimer.unset();
+            if(this.holdingJump && this.velocity.y > 0) {
+                this.velocity.y += .017;
+            }
+        }
+    }
+
+    update() {
+        super.update()
+
+        if(this.groundObject) {
+            this.groundTimer.set()
+        } else {
+            this.groundTimer.unset()
+        }
+
+        this.inputSystem()
+        this.jumpHandling()
+        this.countTilesFunc()
+        this.moveInput = airControlSystem(this.groundTimer, this. moveInput, this.velocity)
+        this.velocity = playerMoveSys(this.moveInput, this.velocity, this.maxSpeed, this.mirror)
+        this.mirror = mirrorHandling(this.moveInput, this.mirror)
+
+        // if(this.pos.y < (tileCollisionSize.y - 3)) {
+        //     this.destroy()
+        // }
+    }
 }

@@ -13,7 +13,6 @@
     "vite": "^5.4.1"
   },
   "dependencies": {
-    "bitecs": "github:NateTheGreatt/bitECS#v0.0.1-alpha.3",
     "js13k-vite-plugins": "^0.3.4",
     "littlejsengine": "^1.9.5"
   }
