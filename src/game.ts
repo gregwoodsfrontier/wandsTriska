@@ -45,8 +45,6 @@ export const incrementTotSteps = () => {
     gameData.totalSteps++
 }
 
-let sky: Sky
-
 function initParams() {
     // init game
     gameData.numOfSpikeBalls = 0
@@ -64,7 +62,7 @@ function gameInit()
     loadLevel(data)
 
     // create sky
-    sky = new Sky()
+    new Sky()
    
     setCameraPos(engineObjects.filter(e => e.name === 'player')[0].pos)
 }
