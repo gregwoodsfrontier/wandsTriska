@@ -1,5 +1,5 @@
 import {
-    engineInit, setShowSplashScreen,
+    engineInit,
     setCameraScale,
     setGravity,
     overlayContext,
@@ -11,25 +11,12 @@ import {
     mouseWheel,
     setCameraPos,
     engineObjects,
-    Vector2,
+    Vector2
 } from 'littlejsengine'
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import SpikeBall from './spikeBall';
 import Sky from './sky';
-
-// Create a world
-
-// show the LittleJS splash screen
-setShowSplashScreen(false);
-
-// sound effects
-// const sound_click = new Sound([1,.5]);
-
-// medals
-
-// game variables
-// let particleEmitter: ParticleEmitter;
 
 export const gameData = {
     numOfSpikeBalls: 0,
