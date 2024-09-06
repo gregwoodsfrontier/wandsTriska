@@ -21,7 +21,7 @@ export enum TILEMAP_LOOKUP {
     DOOR,
     KEY = 5,
     WIZARD,
-    BLOB,
+    FIRE,
     SPIKEBALL
 }
 
