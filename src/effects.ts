@@ -4,7 +4,8 @@ import { Color, ParticleEmitter, PI, rgb, Sound, Vector2 } from "littlejsengine"
 export const SE = {
     JUMP: new Sound([,,193,.04,.07,.15,,2.7,15,,,,,,,,,.9,.02]),
     SPIK_EXPLODE: new Sound([1.1,,33,.01,.11,.79,4,1.3,,-5,,,,1.9,,.6,,.49,.09]),
-    TILE_EXPLODE: new Sound([,,92,.02,.01,.66,1,1.8,8.6,,,,,.5,,.9,,.3,.19,.16])
+    TILE_EXPLODE: new Sound([,,92,.02,.01,.66,1,1.8,8.6,,,,,.5,,.9,,.3,.19,.16]),
+    SHOOT: new Sound([,,193,.04,.07,.15,,2.7,15,,,,,,,,,.9,.02]),
 }
 
 // using the spooky6 pallete

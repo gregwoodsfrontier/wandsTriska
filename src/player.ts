@@ -1,6 +1,7 @@
 import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT } from "littlejsengine";
 import { incrementTotSteps, spawnSpikeBall } from "./game";
 import { SE } from "./effects";
+import FT from "./flamethrower";
 
 const airControlSystem = (_gnT: Timer, _mov: Vector2, _vel: Vector2) => {
     if(_gnT && !_gnT.isSet()) {
@@ -43,8 +44,10 @@ export default class Player extends EngineObject {
         this.prePos = this.pos.copy()
         this.countTile = 0
         this.countTileCooldown = new Timer()
+        this.ft = new FT(this.pos, this)
     }
 
+    ft: FT
     name: string
     moveInput = vec2(0, 0)
     maxSpeed = 0.25

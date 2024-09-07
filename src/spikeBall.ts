@@ -4,7 +4,8 @@ import { makeDeb, PALLETE, SE } from "./effects";
 
 export default class SpikeBall extends EngineObject {
     constructor(_pos: Vector2) {
-        super(_pos, vec2(1, 1), tile(TILEMAP_LOOKUP.SPIKEBALL-1))
+        super(_pos, vec2(0.8, 0.8), tile(TILEMAP_LOOKUP.SPIKEBALL-1))
+        this.drawSize = vec2(1, 1)
         this.name = "spikeball"
         this.setCollision(true, true)
         this.elasticity = 0.9
@@ -32,7 +33,7 @@ export default class SpikeBall extends EngineObject {
     }
 
     destroyWhenStillOnGnd() {
-        if(!this.groundTimer.active() && this.getAliveTime() > 13) {
+        if(this.groundTimer.active() && this.getAliveTime() > 13) {
             this.kill()
         }
     }

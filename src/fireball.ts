@@ -3,9 +3,10 @@ import { TILEMAP_LOOKUP } from "./level";
 import { makeDeb, PALLETE } from "./effects";
 
 export default class Fireball extends EngineObject {
-    constructor(_pos: Vector2) {
+    constructor(_pos: Vector2, _vel: Vector2) {
         super(_pos, vec2(1, 1), tile(TILEMAP_LOOKUP.FIRE-1))
-        this.setCollision(true, true)
+        this.velocity = _vel
+        this.setCollision(true, false)
     }
 
     hide() {
