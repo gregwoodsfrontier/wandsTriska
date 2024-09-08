@@ -1,6 +1,5 @@
-import { EngineObject, Vector2, vec2, Timer, randInt, drawRect, rgb, ParticleEmitter, tile, rand } from "littlejsengine";
+import { EngineObject, Vector2, vec2, drawRect, rgb, rand, min, keyIsDown, timeDelta } from "littlejsengine";
 import Fireball from "./fireball";
-import { TILEMAP_LOOKUP } from "./level";
 import { SE } from "./effects";
 
 /**
@@ -21,16 +20,6 @@ export default class FT extends EngineObject {
         this.damage        = 1;
         this.fireTBuf = 0
 
-        this.shellEmitter = new ParticleEmitter(
-            vec2(), 0, 0, 0, 0, .1,  // pos, angle, emitSize, emitTime, emitRate, emiteCone
-            tile(TILEMAP_LOOKUP.FIRE),                       // tileInfo
-            rgb(1,.8,.5), rgb(.9,.7,.5), // colorStartA, colorStartB
-            rgb(1,.8,.5), rgb(.9,.7,.5), // colorEndA, colorEndB
-            3, .1, .1, .15, .1, // time, sizeStart, sizeEnd, speed, angleSpeed
-            1, .95, 1, 0, 0,    // damp, angleDamp, gravity, particleCone, fade
-            .1, true               // randomness, collide, additive, colorLinear, renderOrder
-        )
-
         this.renderOrder = _parent.renderOrder + 1
     }
 
@@ -39,10 +28,22 @@ export default class FT extends EngineObject {
     bulletSpread: number
     damage: number
     fireTBuf: number // fire time buffer
-    shellEmitter: ParticleEmitter
+    triggerIsDown = false
 
     update() {
+        const shootKey = "KeyC"
         this.posUpdate()
+        this.triggerIsDown = keyIsDown(shootKey)
+        this.fireTBuf += timeDelta
+
+        if(this.triggerIsDown) {
+            for(; this.fireTBuf > 0; this.fireTBuf -= 1/this.fireRate)
+                this.spawnFire()
+        } else {
+            this.fireTBuf = min(this.fireTBuf, 0)
+        }
+
+
         super.update()
     }
 

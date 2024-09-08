@@ -40,7 +40,7 @@ export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] 
             const tileNum = _data[y*levelSize.x + x];
             if(!tileNum) continue
             if(tileNum == TILEMAP_LOOKUP.WIZARD) {
-                new Player(posT.add(vec2(0,1)), vec2(0.6, 0.95), tile(tileNum-1))
+                new Player(posT.add(vec2(0,1)), vec2(0.6, 0.8), tile(tileNum-1))
                 continue
             }
             else if(tileNum == TILEMAP_LOOKUP.SPIKEBALL) {
@@ -121,7 +121,7 @@ export const destroyTile = (_pos: Vector2, _timer: Timer, _tileLayers = tileLaye
     const tileNum = getTileCollisionData(_pos);
     if (!tileNum) return {ch: false, cd: _timer};
 
-    // checl foreground index. hard codiing it.
+    // check foreground index. hard codiing it.
     const layer =_tileLayers[0]
    if(tileNum == TILEMAP_LOOKUP.BREAK && !_timer.active()) {
         // set and clear tile

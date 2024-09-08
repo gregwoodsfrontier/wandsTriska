@@ -1,32 +1,29 @@
-import { EngineObject, Vector2, vec2, tile } from "littlejsengine";
+import { EngineObject, Vector2, vec2, tile, TileInfo } from "littlejsengine";
 import { TILEMAP_LOOKUP } from "./level";
 import { makeDeb, PALLETE } from "./effects";
 
 export default class Fireball extends EngineObject {
     constructor(_pos: Vector2, _vel: Vector2) {
-        super(_pos, vec2(1, 1), tile(TILEMAP_LOOKUP.FIRE-1))
+        super(_pos, vec2(0.5, 0.5), tile(TILEMAP_LOOKUP.FIRE-1))
         this.velocity = _vel
         this.setCollision(true, false)
     }
 
-    hide() {
-        this.color.setHSLA(0, 0, 0, 0)
-    }
-
     kill() {
-        this.hide()
         this.destroy()
-        makeDeb(this.pos, PALLETE.YELLOW)
+        makeDeb(this.pos, PALLETE.WHITE, 5)
     }
 
-    collideWithTile(): boolean {
+    collideWithTile(_tile: number): boolean {
+        if(_tile < 1) return false
         this.kill()
-        return false
+        return true
     }
 
-    collideWithObject(): boolean {
+    collideWithObject(obj: EngineObject): boolean {
         this.kill()
-        return false
+        obj.applyForce(this.velocity.normalize(.1))
+        return true
     }
 
 }

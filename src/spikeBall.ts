@@ -8,6 +8,7 @@ export default class SpikeBall extends EngineObject {
         this.drawSize = vec2(1, 1)
         this.name = "spikeball"
         this.setCollision(true, true)
+        this.mass = 1.0
         this.elasticity = 0.9
         this.groundTimer = new Timer()
         this.airTimer = new Timer()
