@@ -1,4 +1,4 @@
-import { EngineObject, Vector2, vec2, tile, TileInfo } from "littlejsengine";
+import { EngineObject, Vector2, vec2, tile } from "littlejsengine";
 import { TILEMAP_LOOKUP } from "./level";
 import { makeDeb, PALLETE } from "./effects";
 

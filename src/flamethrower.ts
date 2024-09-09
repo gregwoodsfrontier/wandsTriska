@@ -1,4 +1,4 @@
-import { EngineObject, Vector2, vec2, drawRect, rgb, rand, min, keyIsDown, timeDelta } from "littlejsengine";
+import { EngineObject, Vector2, vec2, rand, min, keyIsDown, timeDelta, drawRect, rgb } from "littlejsengine";
 import Fireball from "./fireball";
 import { SE } from "./effects";
 
@@ -28,21 +28,17 @@ export default class FT extends EngineObject {
     bulletSpread: number
     damage: number
     fireTBuf: number // fire time buffer
-    triggerIsDown = false
 
     update() {
-        const shootKey = "KeyC"
         this.posUpdate()
-        this.triggerIsDown = keyIsDown(shootKey)
         this.fireTBuf += timeDelta
 
-        if(this.triggerIsDown) {
+        if(keyIsDown("KeyC")) {
             for(; this.fireTBuf > 0; this.fireTBuf -= 1/this.fireRate)
                 this.spawnFire()
         } else {
             this.fireTBuf = min(this.fireTBuf, 0)
         }
-
 
         super.update()
     }
@@ -52,7 +48,7 @@ export default class FT extends EngineObject {
     }
 
     render(): void {
-        drawRect(this.pos, vec2(0.4, 0.4), rgb(1, 1, 0, 0.5))
+        drawRect(this.pos, vec2(0.4, 0.4), rgb(1, 1, 0, 0))
     }
 
     spawnFire() {
