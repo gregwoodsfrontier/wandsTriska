@@ -1,5 +1,6 @@
-import { Color, EngineObject, hsl, mainCanvas, mainContext, randColor, randInt, RandomGenerator, time, vec2 } from "littlejsengine";
+import { Color, drawText, EngineObject, hsl, mainCanvas, mainContext, overlayCanvas, overlayContext, randColor, randInt, RandomGenerator, rgb, screenToWorld, time, vec2 } from "littlejsengine";
 import { PALLETE } from "./effects";
+import { gameData } from "./game";
 
 export default class Sky extends EngineObject {
     constructor() 

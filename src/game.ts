@@ -11,7 +11,10 @@ import {
     mouseWheel,
     setCameraPos,
     engineObjects,
-    Vector2
+    Vector2,
+    mainContext,
+    mainCanvas,
+    mainCanvasSize
 } from 'littlejsengine'
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
@@ -30,6 +33,16 @@ export const spawnSpikeBall = (_pos: Vector2) => {
 
 export const incrementTotSteps = () => {
     gameData.totalSteps++
+}
+
+export const drawGameText = (_context: CanvasRenderingContext2D, text: string, x: number, y: number, size=40) => {
+    _context.textAlign = 'center';
+    _context.textBaseline = 'top';
+    _context.font = size + 'px arial';
+    _context.fillStyle = '#fff';
+    _context.lineWidth = 3;
+    _context.strokeText(text, x, y);
+    _context.fillText(text, x, y);
 }
 
 function initParams() {
@@ -71,26 +84,16 @@ function gameUpdatePost()
 ///////////////////////////////////////////////////////////////////////////////
 function gameRender()
 {
-    
+    drawGameText(overlayContext ,'<= | => , ^ to jump, C to fire', overlayCanvas.width/2, overlayCanvas.height*0.1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameRenderPost()
 {
-    // draw to overlay canvas for hud rendering
-    const drawText = (text: string, x: number, y: number, size=40) =>
-    {
-        overlayContext.textAlign = 'center';
-        overlayContext.textBaseline = 'top';
-        overlayContext.font = size + 'px arial';
-        overlayContext.fillStyle = '#fff';
-        overlayContext.lineWidth = 3;
-        overlayContext.strokeText(text, x, y);
-        overlayContext.fillText(text, x, y);
-    }
-
-    drawText('Steps: '+gameData.totalSteps, overlayCanvas.width*1/4, 20);
-    drawText('Spawned Spikes: '+gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
+ 
+    drawGameText(overlayContext ,'Steps: '+gameData.totalSteps, overlayCanvas.width*1/4, 20);
+    drawGameText(overlayContext ,'Spawned Spikes: '+gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
+    // drawGameText(overlayContext ,'text', overlayCanvas.width/2, overlayCanvas.height/2);
     
 }
 
