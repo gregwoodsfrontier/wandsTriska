@@ -1,4 +1,4 @@
-import { EngineObject, Vector2, vec2, Timer, tile, rand } from "littlejsengine";
+import { EngineObject, Vector2, vec2, Timer, tile, rand, getTileCollisionData} from "littlejsengine";
 import { destroyTile, TILEMAP_LOOKUP } from "./level";
 import { makeDeb, PALLETE, SE } from "./effects";
 
@@ -11,7 +11,7 @@ export default class SpikeBall extends EngineObject {
         this.mass = 1.0
         this.elasticity = 0.9
         this.groundTimer = new Timer()
-        this.airTimer = new Timer()
+        this.gTPeriod = 3
         this.destroyCooldown = new Timer()
         this.destroyedTilesN = 0
 
@@ -22,8 +22,8 @@ export default class SpikeBall extends EngineObject {
     }
 
     name: string
+    gTPeriod: number
     groundTimer: Timer
-    airTimer: Timer
     destroyCooldown: Timer
     destroyedTilesN: number
 
@@ -34,7 +34,7 @@ export default class SpikeBall extends EngineObject {
     }
 
     destroyWhenStillOnGnd() {
-        if(this.groundTimer.active() && this.getAliveTime() > 13) {
+        if(this.getAliveTime() > 13 && this.groundTimer.elapsed()) {
             this.kill()
         }
     }
@@ -42,12 +42,12 @@ export default class SpikeBall extends EngineObject {
     update() {
         super.update()
 
-        if(this.groundObject) {
-            this.groundTimer.set(2)
-            this.airTimer.unset()
-        } else {
+        const getBottomTile = getTileCollisionData(this.pos.add(vec2(0, -1)))
+
+        if(getBottomTile > 0 && !this.groundTimer.isSet()) {
+            this.groundTimer.set(this.gTPeriod)
+        } else if(getBottomTile <= 0) {
             this.groundTimer.unset()
-            this.airTimer.set()
         }
 
         this.destroyWhenStillOnGnd()
