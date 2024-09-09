@@ -14,9 +14,14 @@ import {
     Vector2,
     mainContext,
     mainCanvas,
-    mainCanvasSize
+    mainCanvasSize,
+    tile,
+    vec2,
+    drawTile,
+    tileCollisionSize,
+    rgb
 } from 'littlejsengine'
-import { loadLevel } from './level';
+import { loadLevel, TILEMAP_LOOKUP } from './level';
 import { data } from './tileLayerData';
 import SpikeBall from './spikeBall';
 import Sky from './sky';
@@ -84,6 +89,7 @@ function gameUpdatePost()
 ///////////////////////////////////////////////////////////////////////////////
 function gameRender()
 {
+    drawTile(vec2(overlayCanvas.width*1/4, 20), vec2(1,1), tile(TILEMAP_LOOKUP.KEY-1), rgb(1, 0, 0, 1), 0, false, undefined, false, true, overlayContext)
     drawGameText(overlayContext ,'<= | => , ^ to jump, C to fire', overlayCanvas.width/2, overlayCanvas.height*0.1);
 }
 

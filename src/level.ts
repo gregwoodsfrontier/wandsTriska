@@ -135,6 +135,10 @@ export const destroyTile = (_pos: Vector2, _timer: Timer, _tileLayers = tileLaye
         _timer.set(0.5)
 
         return {ch: true, cd: _timer}
+   } else if (tileNum == TILEMAP_LOOKUP.KEY) {
+        layer.setData(_pos, new TileLayerData, true);
+        setTileCollisionData(_pos, 0);
+        setTileData(_pos, _tileData, undefined);
    }
 
    return {ch: false, cd: _timer}

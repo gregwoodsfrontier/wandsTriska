@@ -1,4 +1,4 @@
-import { EngineObject, Vector2, vec2, Timer, tile, rand, getTileCollisionData} from "littlejsengine";
+import { EngineObject, Vector2, vec2, Timer, tile, rand, getTileCollisionData, sign} from "littlejsengine";
 import { destroyTile, TILEMAP_LOOKUP } from "./level";
 import { makeDeb, PALLETE, SE } from "./effects";
 
@@ -54,16 +54,16 @@ export default class SpikeBall extends EngineObject {
     }
 
     collideWithTile(tileData: number, pos: Vector2): boolean {
-        if(tileData <= 0) return false
+        if(tileData <= 0 || tileData === TILEMAP_LOOKUP.KEY) return false
 
         let state_obj = destroyTile(pos, this.destroyCooldown)
         this.destroyCooldown = state_obj.cd
         
         if(state_obj.ch) {
             this.destroyedTilesN++
-            if(pos.y < this.pos.y) {
-                this.velocity.add(vec2(1, 0)).normalize(0.75)
-            }
+            // if(pos.y < this.pos.y) {
+            //     this.velocity.add(vec2(1, 0)).normalize(1).scale(sign(this.velocity.x))
+            // }
         }
 
         if(this.destroyedTilesN > 26) {

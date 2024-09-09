@@ -1,7 +1,8 @@
-import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT } from "littlejsengine";
+import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT, drawTile, tile, overlayContext } from "littlejsengine";
 import { incrementTotSteps, spawnSpikeBall } from "./game";
 import { SE } from "./effects";
 import FT from "./flamethrower";
+import { destroyTile, TILEMAP_LOOKUP } from "./level";
 
 const airControlSystem = (_gnT: Timer, _mov: Vector2, _vel: Vector2) => {
     if(_gnT && !_gnT.isSet()) {
@@ -59,6 +60,8 @@ export default class Player extends EngineObject {
     prePos: Vector2
     countTile: number
     countTileCooldown: Timer
+    hasKey = false
+
 
     get getCountTile() {
         return this.countTile
@@ -145,5 +148,13 @@ export default class Player extends EngineObject {
         // if(this.pos.y < (tileCollisionSize.y - 3)) {
         //     this.destroy()
         // }
+    }
+    
+    collideWithTile(tileData: number, pos: Vector2): boolean {
+        if(tileData === TILEMAP_LOOKUP.KEY) {
+            this.hasKey = true
+            destroyTile(pos, new Timer())
+        }
+        return true
     }
 }
