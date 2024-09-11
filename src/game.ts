@@ -19,16 +19,26 @@ import {
     vec2,
     drawTile,
     tileCollisionSize,
-    rgb
+    rgb,
+    Timer,
+    drawRect,
+    hsl,
+    drawText,
+    drawTextScreen
 } from 'littlejsengine'
 import { loadLevel, TILEMAP_LOOKUP } from './level';
 import { data } from './tileLayerData';
 import SpikeBall from './spikeBall';
 import Sky from './sky';
 
+// holds the game state and relevant game data
 export const gameData = {
     numOfSpikeBalls: 0,
-    totalSteps: 0
+    totalSteps: 0,
+    isPlaying: true,
+    isGameOver: true,
+    isWin: false,
+    gameOverTimer: new Timer()
 }
 
 export const spawnSpikeBall = (_pos: Vector2) => {
@@ -38,6 +48,11 @@ export const spawnSpikeBall = (_pos: Vector2) => {
 
 export const incrementTotSteps = () => {
     gameData.totalSteps++
+}
+
+export const createGameOverOverlay = () => {
+    drawRect(vec2(overlayCanvas.width/2, overlayCanvas.height/2), vec2(30, 30), hsl(0, 0, 0.5, 1), 0, false, true, overlayContext)
+    drawTextScreen('YOU WIN !!!', vec2(overlayCanvas.width/2, overlayCanvas.height/2), 40, hsl(0, 0, 1, 1), 3, hsl(0, 0, 0, 1), 'center', '12px arial' ,overlayContext)
 }
 
 export const drawGameText = (_context: CanvasRenderingContext2D, text: string, x: number, y: number, size=40) => {
@@ -89,7 +104,6 @@ function gameUpdatePost()
 ///////////////////////////////////////////////////////////////////////////////
 function gameRender()
 {
-    drawTile(vec2(overlayCanvas.width*1/4, 20), vec2(1,1), tile(TILEMAP_LOOKUP.KEY-1), rgb(1, 0, 0, 1), 0, false, undefined, false, true, overlayContext)
     drawGameText(overlayContext ,'<= | => , ^ to jump, C to fire', overlayCanvas.width/2, overlayCanvas.height*0.1);
 }
 
@@ -99,6 +113,8 @@ function gameRenderPost()
  
     drawGameText(overlayContext ,'Steps: '+gameData.totalSteps, overlayCanvas.width*1/4, 20);
     drawGameText(overlayContext ,'Spawned Spikes: '+gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
+
+    createGameOverOverlay()
     // drawGameText(overlayContext ,'text', overlayCanvas.width/2, overlayCanvas.height/2);
     
 }
