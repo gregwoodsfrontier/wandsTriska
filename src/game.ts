@@ -12,58 +12,16 @@ import {
     setCameraPos,
     engineObjects,
     Vector2,
-    mainContext,
-    mainCanvas,
-    mainCanvasSize,
-    tile,
     vec2,
-    drawTile,
-    tileCollisionSize,
-    rgb,
     Timer,
     drawRect,
     hsl,
-    drawText,
     drawTextScreen
 } from 'littlejsengine'
-import { loadLevel, TILEMAP_LOOKUP } from './level';
+import { loadLevel } from './level';
 import { data } from './tileLayerData';
-import SpikeBall from './spikeBall';
 import Sky from './sky';
-
-// holds the game state and relevant game data
-export const gameData = {
-    numOfSpikeBalls: 0,
-    totalSteps: 0,
-    isPlaying: true,
-    isGameOver: true,
-    isWin: false,
-    gameOverTimer: new Timer()
-}
-
-export const spawnSpikeBall = (_pos: Vector2) => {
-    new SpikeBall(_pos)
-    gameData.numOfSpikeBalls++
-}
-
-export const incrementTotSteps = () => {
-    gameData.totalSteps++
-}
-
-export const createGameOverOverlay = () => {
-    drawRect(vec2(overlayCanvas.width/2, overlayCanvas.height/2), vec2(30, 30), hsl(0, 0, 0.5, 1), 0, false, true, overlayContext)
-    drawTextScreen('YOU WIN !!!', vec2(overlayCanvas.width/2, overlayCanvas.height/2), 40, hsl(0, 0, 1, 1), 3, hsl(0, 0, 0, 1), 'center', '12px arial' ,overlayContext)
-}
-
-export const drawGameText = (_context: CanvasRenderingContext2D, text: string, x: number, y: number, size=40) => {
-    _context.textAlign = 'center';
-    _context.textBaseline = 'top';
-    _context.font = size + 'px arial';
-    _context.fillStyle = '#fff';
-    _context.lineWidth = 3;
-    _context.strokeText(text, x, y);
-    _context.fillText(text, x, y);
-}
+import { gameData, drawGameText } from './global';
 
 function initParams() {
     // init game
@@ -85,6 +43,10 @@ function gameInit()
     new Sky()
    
     setCameraPos(engineObjects.filter(e => e.name === 'player')[0].pos)
+    if(import.meta.env.DEV) {
+        console.log("overlay width: ", overlayCanvas.width)
+        console.log("overlay height: ", overlayCanvas.height)
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,7 +66,8 @@ function gameUpdatePost()
 ///////////////////////////////////////////////////////////////////////////////
 function gameRender()
 {
-    drawGameText(overlayContext ,'<= | => , ^ to jump, C to fire', overlayCanvas.width/2, overlayCanvas.height*0.1);
+    // drawText("<= | => , ^ to jump, C to fire", vec2(15,38), 10000/cameraScale, hsl(0, 0, 1, 1), 0, hsl(0, 0, 0, 1), 'center', '120px arial')
+    drawGameText(overlayContext ,'<= | => , ^ to jump, C to fire', overlayCanvas.width/2, overlayCanvas.height*0.1, 45);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -114,8 +77,7 @@ function gameRenderPost()
     drawGameText(overlayContext ,'Steps: '+gameData.totalSteps, overlayCanvas.width*1/4, 20);
     drawGameText(overlayContext ,'Spawned Spikes: '+gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
 
-    createGameOverOverlay()
-    // drawGameText(overlayContext ,'text', overlayCanvas.width/2, overlayCanvas.height/2);
+    // createGameOverOverlay()
     
 }
 

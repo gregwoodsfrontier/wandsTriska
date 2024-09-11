@@ -1,6 +1,7 @@
-import { EngineObject, Vector2, vec2, Timer, tile, rand, getTileCollisionData, sign} from "littlejsengine";
-import { destroyTile, TILEMAP_LOOKUP } from "./level";
+import { EngineObject, Vector2, vec2, Timer, tile, rand, getTileCollisionData} from "littlejsengine";
+import { destroyTile } from "./level";
 import { makeDeb, PALLETE, SE } from "./effects";
+import { TILEMAP_LOOKUP } from './global'
 
 export default class SpikeBall extends EngineObject {
     constructor(_pos: Vector2) {

@@ -1,8 +1,8 @@
 import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT, drawTile, tile, overlayContext } from "littlejsengine";
-import { incrementTotSteps, spawnSpikeBall } from "./game";
+import { gameData, incrementTotSteps, spawnSpikeBall, TILEMAP_LOOKUP } from "./global";
 import { SE } from "./effects";
 import FT from "./flamethrower";
-import { destroyTile, TILEMAP_LOOKUP } from "./level";
+import { destroyTile } from "./level";
 
 const airControlSystem = (_gnT: Timer, _mov: Vector2, _vel: Vector2) => {
     if(_gnT && !_gnT.isSet()) {
@@ -46,6 +46,10 @@ export default class Player extends EngineObject {
         this.countTile = 0
         this.countTileCooldown = new Timer()
         this.ft = new FT(this.pos, this)
+        this.sBCoolDown = new Timer()
+        this.sBInEffect = new Timer()
+        this.sBCDPeriod = 0.8
+        this.sBCount = 1
     }
 
     ft: FT
@@ -61,6 +65,11 @@ export default class Player extends EngineObject {
     countTile: number
     countTileCooldown: Timer
     hasKey = false
+    // spikeball spawning related
+    sBCoolDown: Timer
+    sBCDPeriod: number // in seconds
+    sBInEffect: Timer
+    sBCount: number
 
 
     get getCountTile() {
@@ -82,7 +91,8 @@ export default class Player extends EngineObject {
                 this.countTile = 0
             } else {
                 this.countTile++
-                incrementTotSteps()
+                gameData.totalSteps = incrementTotSteps(gameData.totalSteps)
+                console.log(gameData.totalSteps)
             }
             this.countTileCooldown.set(0.5)
         }
@@ -90,6 +100,24 @@ export default class Player extends EngineObject {
     }
 
     trigger() {
+        // set the effect timer with no countdown
+        this.sBInEffect.set()
+
+        // run within set amount of time
+        for(let j = this.sBCount ; j > 0; j--) {
+            console.log('read')
+            if(!this.sBCoolDown.active()) {
+               this.findSpikeBallSpawnPos()
+               this.sBCoolDown.set(this.sBCDPeriod) 
+            }
+        }
+
+        this.sBInEffect.unset()
+        this.sBCoolDown.unset()
+    }
+
+    findSpikeBallSpawnPos() {
+        // find a starting position and start counting
         const spawnPos = this.pos.floor().add(vec2(-2, 2))
         const range = 4
         for(let i = range; i--;) {
@@ -102,7 +130,6 @@ export default class Player extends EngineObject {
                 ASSERT(false, "there is tile in spawn position")
             }
         }
-       
     }
 
     jumpHandling() {

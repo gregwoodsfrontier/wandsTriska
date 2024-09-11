@@ -1,5 +1,5 @@
 import { EngineObject, Vector2, vec2, tile } from "littlejsengine";
-import { TILEMAP_LOOKUP } from "./level";
+import { TILEMAP_LOOKUP } from "./global";
 import { makeDeb, PALLETE } from "./effects";
 
 export default class Fireball extends EngineObject {

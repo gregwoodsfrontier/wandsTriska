@@ -1,6 +1,6 @@
 import { TileLayer, TileLayerData, Timer, Vector2, getTileCollisionData, initTileCollision, randInt, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
 import Player from "./player";
-import { spawnSpikeBall } from "./game";
+import { spawnSpikeBall, tileLayers, tileData2, TILEMAP_LOOKUP, maxAddHeight } from "./global";
 import { makeDeb, PALLETE, SE } from "./effects";
 
 export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: number|undefined)=>
@@ -9,21 +9,6 @@ export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: 
 export const getTileData = (pos: Vector2, tileData: (number|undefined)[])=>
     pos.arrayCheck(tileCollisionSize) ? tileData[(pos.y|0)*tileCollisionSize.x+pos.x|0]: 0;
 
-export const tileLayers = [] as TileLayer[]
-
-export const tileData2 = [] as (number|undefined)[]
-
-export const maxAddHeight = 30
-
-export enum TILEMAP_LOOKUP {
-    BREAK = 1,
-    BLOCK,
-    DOOR,
-    KEY = 5,
-    WIZARD,
-    FIRE,
-    SPIKEBALL
-}
 
 export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] = tileLayers, _tileData = tileData2) => {
     // need to set the level size first.
@@ -111,7 +96,6 @@ export const addRowTile = (_addedRows: number) => {
             addTile(pos, TILEMAP_LOOKUP.BREAK)
         }
     }
-    // tileLayers[0].redraw()
 }
 
 export const destroyTile = (_pos: Vector2, _timer: Timer, _tileLayers = tileLayers, _tileData = tileData2) => {
