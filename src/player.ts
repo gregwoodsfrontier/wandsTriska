@@ -1,4 +1,4 @@
-import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT } from "littlejsengine";
+import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT, randInt } from "littlejsengine";
 import { gameData, incrementTotSteps, spawnSpikeBall, TILEMAP_LOOKUP } from "./global";
 import { SE } from "./effects";
 import FT from "./flamethrower";
@@ -86,6 +86,7 @@ export default class Player extends EngineObject {
         this.countTile = 0
         this.sBCount = 1
         this.sBCurr = this.sBCount
+        this.hasKey = false
     }
 
 
@@ -107,7 +108,7 @@ export default class Player extends EngineObject {
     countTilesFunc() {
         if(Math.floor(this.prePos.x) === Math.floor(this.pos.x) || this.countTileCooldown.active() || !this.groundTimer.active()) return
         if(!this.countTileCooldown.active()) {
-            if(this.countTile > 12) {
+            if(this.countTile > 11) {
                 this.trigger()
                 this.countTile = 0
             } else {
@@ -126,16 +127,38 @@ export default class Player extends EngineObject {
 
     findSpikeBallSpawnPos() {
         // find a starting position and start counting
-        const spawnPos = this.pos.floor().add(vec2(-2, 2))
+        const spawnPosGp = []
+        // const spawnPos = this.pos.floor().add(vec2(-2, 2))
         const range = 4
-        for(let i = range; i--;) {
-            if(!getTileCollisionData(spawnPos.add(vec2(i, 0)))) {
-                 // spawn a spikeball
-                spawnSpikeBall(spawnPos.add(vec2(i, 0)))
-                return
-            }
-            else {
-                ASSERT(false, "there is tile in spawn position")
+        for(let i = 0; i < range; i++) {
+            spawnPosGp.push(this.pos.floor().add(vec2(-2 + i, 2)))
+        }
+        const pickPos = spawnPosGp[randInt(0, spawnPosGp.length-1)]
+        spawnSpikeBall(pickPos)
+        // for(let i = range; i--;) {
+        //     if(!getTileCollisionData(spawnPos.add(vec2(i, 0)))) {
+        //          // spawn a spikeball
+        //         spawnSpikeBall(spawnPos.add(vec2(i, 0)))
+        //         return
+        //     }
+        //     else {
+        //         ASSERT(false, "there is tile in spawn position")
+        //     }
+        // }
+    }
+
+    spikeBallStateHandle() {
+        if(this.sBInEffect.isSet()) {
+            if(!this.sBCoolDown.active() && this.sBCurr > 0) {
+                this.findSpikeBallSpawnPos()
+                this.sBCoolDown.set(this.sBCDPeriod)
+                this.sBCurr = clamp(this.sBCurr-1, 0, this.sBCurr)
+            } else if(this.sBCurr === 0) {
+                // reset the params
+                this.sBCount = clamp(this.sBCount+1, this.sBCount, 3)
+                this.sBCurr = this.sBCount
+                this.sBInEffect.unset()
+                this.sBCoolDown.unset()
             }
         }
     }
@@ -180,19 +203,7 @@ export default class Player extends EngineObject {
         this.velocity = playerMoveSys(this.moveInput, this.velocity, this.maxSpeed, this.mirror)
         this.mirror = mirrorHandling(this.moveInput, this.mirror)
 
-        if(this.sBInEffect.isSet()) {
-            if(!this.sBCoolDown.active() && this.sBCurr > 0) {
-                this.findSpikeBallSpawnPos()
-                this.sBCoolDown.set(this.sBCDPeriod)
-                this.sBCurr = clamp(this.sBCurr-1, 0, this.sBCurr)
-            } else if(this.sBCurr === 0) {
-                // reset the params
-                this.sBCount = clamp(this.sBCount+1, this.sBCount, 3)
-                this.sBCurr = this.sBCount
-                this.sBInEffect.unset()
-                this.sBCoolDown.unset()
-            }
-        }
+        this.spikeBallStateHandle()
     }
     
     collideWithTile(tileData: number, pos: Vector2): boolean {

@@ -15,11 +15,6 @@ export default class SpikeBall extends EngineObject {
         this.gTPeriod = 3
         this.destroyCooldown = new Timer()
         this.destroyedTilesN = 0
-
-        this.velocity = vec2(
-            1,
-            rand(-2, 2)
-        ).normalize(0.5)
     }
 
     name: string

@@ -13,7 +13,12 @@ import {
     engineObjects,
     keyWasPressed,
     engineObjectsDestroy,
-    tile} from 'littlejsengine'
+    tile,
+    drawTextScreen,
+    hsl,
+    vec2,
+    lerp,
+    max} from 'littlejsengine'
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import Sky from './sky';
@@ -73,16 +78,20 @@ function gameUpdatePost()
 ///////////////////////////////////////////////////////////////////////////////
 function gameRender()
 {
-    // drawText("<= | => , ^ to jump, C to fire", vec2(15,38), 10000/cameraScale, hsl(0, 0, 1, 1), 0, hsl(0, 0, 0, 1), 'center', '120px arial')
     drawGameText(overlayContext ,'<= | => , ^ to jump, C to fire', overlayCanvas.width/2, overlayCanvas.height*0.1, 45);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameRenderPost()
 {
- 
-    drawGameText(overlayContext ,'Steps: '+gameData.totalSteps, overlayCanvas.width*1/4, 20);
-    drawGameText(overlayContext ,'Spawned Spikes: '+gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
+    const remainSteps = 13 - playerGroup[0].getCountTile
+    drawGameText(overlayContext ,`${remainSteps} Steps to Spikes`, overlayCanvas.width*1/4, 20, 40*lerp(1-(remainSteps/13), 1, 2));
+    drawGameText(overlayContext ,'Spawned Spikes: '+ gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
+
+    // show key state if obtained
+    if(playerGroup[0].hasKey) {
+        drawGameText(overlayContext, '[KEY]', overlayCanvas.width*1/2, 20);
+    }
 
     if(gameData.gameOverTimer.active()) {
         createGameOverOverlay()
