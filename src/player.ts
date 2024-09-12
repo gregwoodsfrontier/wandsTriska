@@ -78,6 +78,10 @@ export default class Player extends EngineObject {
         return this.countTile
     }
 
+    setKeyState(_state: boolean) {
+        this.hasKey = _state
+    }
+
     inputSystem() {
         this.moveInput = isUsingGamepad ? gamepadStick(0) : vec2(keyIsDown('ArrowRight')?1:0 - (keyIsDown('ArrowLeft')?1:0), 
         keyIsDown('ArrowUp')?1:0 - (keyIsDown('ArrowDown')?1:0));
@@ -178,7 +182,7 @@ export default class Player extends EngineObject {
     
     collideWithTile(tileData: number, pos: Vector2): boolean {
         if(tileData === TILEMAP_LOOKUP.KEY) {
-            this.hasKey = true
+            this.setKeyState(true)
             destroyTile(pos, new Timer())
         }
         return true

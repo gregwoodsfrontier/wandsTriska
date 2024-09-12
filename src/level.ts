@@ -43,16 +43,15 @@ export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] 
 
     for(let i = 0; i < maxAddHeight - 1; i++) {
         if(i === maxAddHeight - 2) {
-            addRandomRowTile(i, 0, true)
+            addRandomRowTile(i, 0, true, false)
+        } else if (i === maxAddHeight - 3) {
+            addRandomRowTile(i, 0, false, true)
         } else {
             const rando = randInt(10, 25)
-            addRandomRowTile(i, rando, false)
+            addRandomRowTile(i, rando, false, false)
         }
     }
-    
-    _tileLayers[0].renderOrder = 1e3
-
-    
+    _tileLayers[0].renderOrder = 1000
 }
 
 export const addTile = (_pos: Vector2, _tileNum: number, _tileLayers = tileLayers, _tileData = tileData2) => {
@@ -65,9 +64,15 @@ export const addTile = (_pos: Vector2, _tileNum: number, _tileLayers = tileLayer
     _tileLayers[0].redrawEnd()
 }
 
-export const addRandomRowTile = (_addedRows: number, _probBl: number, _allBlk: boolean) => {
+export const addRandomRowTile = (_addedRows: number, _probBl: number, _allBlk: boolean, _doorRow: boolean) => {
     // tileLayers[0].redrawStart()
     if(_probBl<0 || _probBl>100) throw new Error("probability of block tiles should be within 0 and 100")
+    if(_allBlk && _doorRow) throw new Error("all block setting and door row should not be both true.")
+    let doorNum = 0
+    if(_doorRow) {
+        doorNum = randInt(0, tileCollisionSize.x-1)
+        doorCoord = doorCoord.add(vec2(doorNum, maxAddHeight - 3))
+    }
     for(let i = 0; i < tileCollisionSize.x; i++) {
         let pos = vec2(i, maxAddHeight - _addedRows)
         if(i == 0 || i == tileCollisionSize.x-1) {
@@ -75,6 +80,12 @@ export const addRandomRowTile = (_addedRows: number, _probBl: number, _allBlk: b
         } else {
             if(_allBlk) {
                 addTile(pos, TILEMAP_LOOKUP.BLOCK)
+            } else if (_doorRow) {
+                if(i == doorNum) {
+                    addTile(pos, TILEMAP_LOOKUP.DOOR)
+                } else {
+                    addTile(pos, TILEMAP_LOOKUP.BREAK)
+                }
             } else {
                 const rand = randInt(0, 100)
                 if(rand>0 && rand<_probBl) {
