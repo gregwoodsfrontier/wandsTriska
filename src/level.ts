@@ -3,6 +3,8 @@ import Player from "./player";
 import { spawnSpikeBall, tileLayers, tileData2, TILEMAP_LOOKUP, maxAddHeight } from "./global";
 import { makeDeb, PALLETE, SE } from "./effects";
 
+export let doorCoord = vec2()
+
 export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: number|undefined)=>
     pos.arrayCheck(tileCollisionSize) && (tileData[(pos.y|0)*tileCollisionSize.x+pos.x|0] = data);
 
