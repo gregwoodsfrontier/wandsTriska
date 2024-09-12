@@ -1,4 +1,4 @@
-import { EngineObject, Vector2, vec2, Timer, tile, rand, getTileCollisionData} from "littlejsengine";
+import { EngineObject, Vector2, vec2, Timer, tile, rand, getTileCollisionData, hsl} from "littlejsengine";
 import { destroyTile } from "./level";
 import { makeDeb, PALLETE, SE } from "./effects";
 import { TILEMAP_LOOKUP } from './global'
@@ -35,7 +35,7 @@ export default class SpikeBall extends EngineObject {
     }
 
     destroyWhenStillOnGnd() {
-        if(this.getAliveTime() > 13 && this.groundTimer.elapsed()) {
+        if(this.groundTimer.elapsed()) {
             this.kill()
         }
     }
@@ -52,6 +52,14 @@ export default class SpikeBall extends EngineObject {
         }
 
         this.destroyWhenStillOnGnd()
+    }
+
+    render() {
+        super.render()
+        if(this.groundTimer.active() && this.groundTimer.getPercent() > 0.15) {
+            const per = this.groundTimer.getPercent()
+            this.additiveColor = hsl(0, 0, 0, 0).lerp(hsl(0, 0, 1, 1), per)
+        }
     }
 
     collideWithTile(tileData: number, pos: Vector2): boolean {
