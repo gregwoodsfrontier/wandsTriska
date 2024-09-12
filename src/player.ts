@@ -93,7 +93,7 @@ export default class Player extends EngineObject {
         this.countTile = 0
         this.sBCount = 1
         this.sBCurr = this.sBCount
-        this.hasKey = false
+        // this.hasKey = false
         this.isDead = false
     }
 
@@ -233,7 +233,7 @@ export default class Player extends EngineObject {
     collideWithTile(tileData: number, pos: Vector2): boolean {
         if(tileData === TILEMAP_LOOKUP.KEY) {
             this.setKeyState(true)
-            destroyTile(pos, new Timer())
+            destroyTile(pos)
         } else if (tileData === TILEMAP_LOOKUP.DOOR) {
             if(!this.hasKey) return true
             this.setKeyState(false)

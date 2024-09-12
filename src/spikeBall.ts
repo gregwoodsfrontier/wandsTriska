@@ -60,9 +60,13 @@ export default class SpikeBall extends EngineObject {
     collideWithTile(tileData: number, pos: Vector2): boolean {
         if(tileData <= 0 || tileData === TILEMAP_LOOKUP.KEY || tileData === TILEMAP_LOOKUP.DOOR) return false
 
-        let state_obj = destroyTile(pos, this.destroyCooldown)
-        this.destroyCooldown = state_obj.cd
-        
+        destroyTile(pos)
+
+        // for(let p of [-1, 1]) {
+        //     if(getTileCollisionData(this.pos.add(vec2(p, 0))) === TILEMAP_LOOKUP.BREAK) {
+        //         destroyTile(this.pos.add(vec2(p, 0)))
+        //     }
+        // }
         return true
     }
 }

@@ -62,6 +62,7 @@ function gameUpdate()
             playerGroup.length = 0
             playerGroup.push(createPlayer(gameData.playerStartPos))
             setCameraPos(playerGroup[0].pos)
+            playerGroup[0].setStartGameParams()
         }
     }
 

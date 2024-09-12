@@ -40,7 +40,7 @@ export const createPlayer = (_pos: Vector2) => {
 
 export const spawnSpikeBall = (_pos: Vector2) => {
     const sB = new SpikeBall(_pos)
-    sB.velocity = vec2(1, randSign()*2).normalize(0.75)
+    sB.velocity = vec2(1, randSign()*1).normalize(0.5)
 
     gameData.numOfSpikeBalls++
 }

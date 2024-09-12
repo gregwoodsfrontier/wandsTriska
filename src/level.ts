@@ -112,16 +112,16 @@ export const addRowTile = (_addedRows: number) => {
     }
 }
 
-export const destroyTile = (_pos: Vector2, _timer: Timer, _tileLayers = tileLayers, _tileData = tileData2) => {
+export const destroyTile = (_pos: Vector2, _tileLayers = tileLayers, _tileData = tileData2) => {
     _pos = _pos.floor()
 
     // destroy tile
     const tileNum = getTileCollisionData(_pos);
-    if (!tileNum) return {ch: false, cd: _timer};
+    if (!tileNum) return false;
 
     // check foreground index. hard codiing it.
     const layer =_tileLayers[0]
-   if(tileNum == TILEMAP_LOOKUP.BREAK && !_timer.active()) {
+   if(tileNum == TILEMAP_LOOKUP.BREAK) {
         // set and clear tile
         layer.setData(_pos, new TileLayerData, true);
         setTileCollisionData(_pos, 0);
@@ -130,14 +130,12 @@ export const destroyTile = (_pos: Vector2, _timer: Timer, _tileLayers = tileLaye
         SE.TILE_EXPLODE.play()
         makeDeb(_pos, PALLETE.YELLOW)
 
-        _timer.set(0.5)
-
-        return {ch: true, cd: _timer}
+        return true
    } else if (tileNum == TILEMAP_LOOKUP.KEY) {
         layer.setData(_pos, new TileLayerData, true);
         setTileCollisionData(_pos, 0);
         setTileData(_pos, _tileData, undefined);
    }
 
-   return {ch: false, cd: _timer}
+   return false
 }
