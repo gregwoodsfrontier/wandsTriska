@@ -1,6 +1,6 @@
 // holds all my global variables and costants in 1 file
 
-import { Timer, Vector2, drawRect, vec2, overlayCanvas, hsl, overlayContext, drawTextScreen, TileLayer, randSign } from "littlejsengine"
+import { Timer, Vector2, drawRect, vec2, overlayCanvas, hsl, overlayContext, drawTextScreen, TileLayer, randSign, tile } from "littlejsengine"
 import SpikeBall from "./spikeBall"
 import Player from "./player"
 
@@ -12,7 +12,8 @@ export const gameData = {
     isGameOver: false,
     isWin: false,
     gameOverTimer: new Timer(),
-    gOverTime: .9
+    gOverTime: .9,
+    playerStartPos: vec2()
 }
 
 export const playerGroup = [] as Player[]
@@ -31,6 +32,10 @@ export const setGameOver = (_isWin: boolean) => {
     gameData.isPlaying = false
     gameData.isWin = _isWin
     gameData.gameOverTimer.set(gameData.gOverTime)
+}
+
+export const createPlayer = (_pos: Vector2) => {
+    return new Player(_pos, vec2(0.6, 0.8), tile(TILEMAP_LOOKUP.WIZARD-1))
 }
 
 export const spawnSpikeBall = (_pos: Vector2) => {

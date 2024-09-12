@@ -1,8 +1,9 @@
-import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT, randInt } from "littlejsengine";
+import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT, randInt, randSign, rand } from "littlejsengine";
 import { gameData, incrementTotSteps, setGameOver, spawnSpikeBall, TILEMAP_LOOKUP } from "./global";
-import { SE } from "./effects";
+import { PALLETE, SE } from "./effects";
 import FT from "./flamethrower";
 import { destroyTile } from "./level";
+import SpikeBall from "./spikeBall";
 
 const airControlSystem = (_gnT: Timer, _mov: Vector2, _vel: Vector2) => {
     if(_gnT && !_gnT.isSet()) {
@@ -52,6 +53,8 @@ export default class Player extends EngineObject {
         this.sBCDPeriod = 0.8
         this.sBCount = 1
         this.sBCurr = this.sBCount
+        this.isDead = false
+        this.deathTimer = new Timer()
     }
 
     ft: FT
@@ -73,6 +76,9 @@ export default class Player extends EngineObject {
     sBInEffect: Timer
     sBCount: number
     sBCurr: number
+    // death mechanics handling
+    isDead: boolean
+    deathTimer: Timer
 
     setStartGameParams() {
         this.groundTimer?.unset()
@@ -81,12 +87,14 @@ export default class Player extends EngineObject {
         this.countTileCooldown?.unset()
         this.sBCoolDown?.unset()
         this.sBInEffect?.unset()
+        this.deathTimer?.unset()
 
         this.prePos = this.pos.copy()
         this.countTile = 0
         this.sBCount = 1
         this.sBCurr = this.sBCount
         this.hasKey = false
+        this.isDead = false
     }
 
 
@@ -125,6 +133,15 @@ export default class Player extends EngineObject {
         this.sBInEffect.set()
     }
 
+    playDeadAnims(obj: EngineObject) {
+        this.size = this.size.scale(.5);
+        const fallDirection = obj ? sign(obj.velocity.x) : randSign();
+        this.color = PALLETE.DARK_1
+        this.angleVelocity = fallDirection*rand(.22,.14);
+        this.angleDamping = .9;
+        this.renderOrder = -1;  // move to back layer
+    }
+
     findSpikeBallSpawnPos() {
         // find a starting position and start counting
         const spawnPosGp = []
@@ -135,16 +152,6 @@ export default class Player extends EngineObject {
         }
         const pickPos = spawnPosGp[randInt(0, spawnPosGp.length-1)]
         spawnSpikeBall(pickPos)
-        // for(let i = range; i--;) {
-        //     if(!getTileCollisionData(spawnPos.add(vec2(i, 0)))) {
-        //          // spawn a spikeball
-        //         spawnSpikeBall(spawnPos.add(vec2(i, 0)))
-        //         return
-        //     }
-        //     else {
-        //         ASSERT(false, "there is tile in spawn position")
-        //     }
-        // }
     }
 
     spikeBallStateHandle() {
@@ -188,6 +195,8 @@ export default class Player extends EngineObject {
     }
 
     update() {
+        if(this.isDead) return super.update()
+
         super.update()
 
         if(this.groundObject) {
@@ -204,6 +213,21 @@ export default class Player extends EngineObject {
         this.mirror = mirrorHandling(this.moveInput, this.mirror)
 
         this.spikeBallStateHandle()
+    }
+
+    setDeath(_obj: EngineObject) {
+        this.isDead = true
+        this.deathTimer.set(1)
+        this.playDeadAnims(_obj)
+    }
+
+    collideWithObject(_obj: EngineObject): boolean {
+        const sB = _obj as SpikeBall
+        if(sB.name) {
+            this.setCollision(false, false)
+            this.setDeath(sB)
+        }
+        return true
     }
     
     collideWithTile(tileData: number, pos: Vector2): boolean {

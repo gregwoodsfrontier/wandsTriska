@@ -1,6 +1,6 @@
 import { TileLayer, TileLayerData, Timer, Vector2, getTileCollisionData, initTileCollision, randInt, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
 import Player from "./player";
-import { spawnSpikeBall, tileLayers, tileData2, TILEMAP_LOOKUP, maxAddHeight, playerGroup } from "./global";
+import { spawnSpikeBall, tileLayers, tileData2, TILEMAP_LOOKUP, maxAddHeight, playerGroup, gameData, createPlayer } from "./global";
 import { makeDeb, PALLETE, SE } from "./effects";
 
 export let doorCoord = vec2()
@@ -10,7 +10,6 @@ export const setTileData = (pos: Vector2, tileData: (number|undefined)[], data: 
 
 export const getTileData = (pos: Vector2, tileData: (number|undefined)[])=>
     pos.arrayCheck(tileCollisionSize) ? tileData[(pos.y|0)*tileCollisionSize.x+pos.x|0]: 0;
-
 
 export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] = tileLayers, _tileData = tileData2) => {
     // need to set the level size first.
@@ -27,7 +26,8 @@ export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] 
             const tileNum = _data[y*levelSize.x + x];
             if(!tileNum) continue
             if(tileNum == TILEMAP_LOOKUP.WIZARD) {
-                const p = new Player(posT.add(vec2(0,1)), vec2(0.6, 0.8), tile(tileNum-1))
+                gameData.playerStartPos = posT.add(vec2(0,1))
+                const p = createPlayer(gameData.playerStartPos)
                 if(playerGroup.length === 0) {playerGroup.push(p)}
                 continue
             }

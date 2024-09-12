@@ -22,7 +22,7 @@ import {
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import Sky from './sky';
-import { gameData, drawGameText, setGameOver, setPlayingGame, createGameOverOverlay, tileData2, tileLayers, playerGroup } from './global';
+import { gameData, drawGameText, setGameOver, setPlayingGame, createGameOverOverlay, tileData2, tileLayers, playerGroup, createPlayer } from './global';
 
 function initParams() {
     // init game
@@ -57,6 +57,14 @@ function gameUpdate()
         clamp(cameraScale * (1-mouseWheel*0.1), 1, 1e3)
     )
 
+    if(playerGroup[0].isDead) {
+        if(playerGroup[0].deathTimer.elapsed()) {
+            playerGroup.length = 0
+            playerGroup.push(createPlayer(gameData.playerStartPos))
+            setCameraPos(playerGroup[0].pos)
+        }
+    }
+
     if(gameData.gameOverTimer.elapsed()) {
         gameInit()
     }
@@ -77,15 +85,17 @@ function gameRender()
 ///////////////////////////////////////////////////////////////////////////////
 function gameRenderPost()
 {
-    const remainSteps = 13 - playerGroup[0].getCountTile
-    drawGameText(overlayContext ,`${remainSteps} Steps to Spikes`, overlayCanvas.width*1/4, 20, 40*lerp(1-(remainSteps/13), 1, 2));
-    drawGameText(overlayContext ,'Spawned Spikes: '+ gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
-
-    // show key state if obtained
-    if(playerGroup[0].hasKey) {
-        drawGameText(overlayContext, '[KEY]', overlayCanvas.width*1/2, 20);
+    if(playerGroup[0]) {
+        const remainSteps = 13 - playerGroup[0].getCountTile
+        drawGameText(overlayContext ,`${remainSteps} Steps to Spikes`, overlayCanvas.width*1/4, 20, 40*lerp(1-(remainSteps/13), 1, 2));
+        drawGameText(overlayContext ,'Spawned Spikes: '+ gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
+    
+        // show key state if obtained
+        if(playerGroup[0].hasKey) {
+            drawGameText(overlayContext, '[KEY]', overlayCanvas.width*1/2, 20);
+        }    
     }
-
+    
     if(gameData.gameOverTimer.active()) {
         createGameOverOverlay()
     }
