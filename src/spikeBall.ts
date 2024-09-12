@@ -1,4 +1,4 @@
-import { EngineObject, Vector2, vec2, Timer, tile, rand, getTileCollisionData, hsl} from "littlejsengine";
+import { EngineObject, Vector2, vec2, Timer, tile, getTileCollisionData, hsl} from "littlejsengine";
 import { destroyTile } from "./level";
 import { makeDeb, PALLETE, SE } from "./effects";
 import { TILEMAP_LOOKUP } from './global'

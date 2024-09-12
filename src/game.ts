@@ -10,19 +10,12 @@ import {
     cameraScale,
     mouseWheel,
     setCameraPos,
-    engineObjects,
-    keyWasPressed,
     engineObjectsDestroy,
-    tile,
-    drawTextScreen,
-    hsl,
-    vec2,
-    lerp,
-    max} from 'littlejsengine'
+    lerp} from 'littlejsengine'
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import Sky from './sky';
-import { gameData, drawGameText, setGameOver, setPlayingGame, createGameOverOverlay, tileData2, tileLayers, playerGroup, createPlayer } from './global';
+import { gameData, drawGameText, setPlayingGame, createGameOverOverlay, tileData2, tileLayers, playerGroup, createPlayer } from './global';
 
 function initParams() {
     // init game

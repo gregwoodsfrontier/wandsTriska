@@ -1,5 +1,4 @@
-import { TileLayer, TileLayerData, Timer, Vector2, getTileCollisionData, initTileCollision, randInt, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
-import Player from "./player";
+import { TileLayer, TileLayerData, Vector2, getTileCollisionData, initTileCollision, randInt, setTileCollisionData, tile, tileCollisionSize, vec2 } from "littlejsengine";
 import { spawnSpikeBall, tileLayers, tileData2, TILEMAP_LOOKUP, maxAddHeight, playerGroup, gameData, createPlayer } from "./global";
 import { makeDeb, PALLETE, SE } from "./effects";
 

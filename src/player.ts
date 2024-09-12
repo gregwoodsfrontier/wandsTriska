@@ -1,4 +1,4 @@
-import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT, randInt, randSign, rand } from "littlejsengine";
+import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, randInt, randSign, rand } from "littlejsengine";
 import { gameData, incrementTotSteps, setGameOver, spawnSpikeBall, TILEMAP_LOOKUP } from "./global";
 import { PALLETE, SE } from "./effects";
 import FT from "./flamethrower";
