@@ -39,6 +39,7 @@ export default class Player extends EngineObject {
         this.name = "player"
         this.drawSize = vec2(1, 1)
         this.setCollision(true, true)
+
         this.groundTimer = new Timer()
         this.pressedJumpTimer = new Timer()
         this.jumpTimer = new Timer()
@@ -72,6 +73,20 @@ export default class Player extends EngineObject {
     sBInEffect: Timer
     sBCount: number
     sBCurr: number
+
+    setStartGameParams() {
+        this.groundTimer?.unset()
+        this.pressedJumpTimer?.unset()
+        this.jumpTimer?.unset()
+        this.countTileCooldown?.unset()
+        this.sBCoolDown?.unset()
+        this.sBInEffect?.unset()
+
+        this.prePos = this.pos.copy()
+        this.countTile = 0
+        this.sBCount = 1
+        this.sBCurr = this.sBCount
+    }
 
 
     get getCountTile() {

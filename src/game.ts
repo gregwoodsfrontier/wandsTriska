@@ -11,19 +11,24 @@ import {
     mouseWheel,
     setCameraPos,
     engineObjects,
-    keyWasPressed} from 'littlejsengine'
+    keyWasPressed,
+    engineObjectsDestroy,
+    tile} from 'littlejsengine'
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import Sky from './sky';
-import { gameData, drawGameText, setGameOver, setPlayingGame } from './global';
+import { gameData, drawGameText, setGameOver, setPlayingGame, createGameOverOverlay, tileData2, tileLayers, playerGroup } from './global';
 
 function initParams() {
     // init game
     gameData.numOfSpikeBalls = 0
     gameData.totalSteps = 0
+    tileData2.length = 0
+    tileLayers.length = 0
+    playerGroup.length = 0
     setGravity(-.01)
     setObjectDefaultAngleDamping(.99)
-    setObjectDefaultDamping(.75)
+    setObjectDefaultDamping(.99)
     setCameraScale(32)
     setPlayingGame()
 }
@@ -31,18 +36,13 @@ function initParams() {
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
+    engineObjectsDestroy()
     initParams()
-    
     loadLevel(data)
-
     // create sky
     new Sky()
-   
-    setCameraPos(engineObjects.filter(e => e.name === 'player')[0].pos)
-    if(import.meta.env.DEV) {
-        console.log("overlay width: ", overlayCanvas.width)
-        console.log("overlay height: ", overlayCanvas.height)
-    }
+    setCameraPos(playerGroup[0].pos)
+    playerGroup[0].setStartGameParams()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,6 +57,10 @@ function gameUpdate()
         if(keyWasPressed("KeyY")) {
             setGameOver()
         }
+    }
+
+    if(gameData.gameOverTimer.elapsed()) {
+        gameInit()
     }
 }
 
@@ -80,8 +84,9 @@ function gameRenderPost()
     drawGameText(overlayContext ,'Steps: '+gameData.totalSteps, overlayCanvas.width*1/4, 20);
     drawGameText(overlayContext ,'Spawned Spikes: '+gameData.numOfSpikeBalls, overlayCanvas.width*3/4 - 0.1, 20);
 
-    // createGameOverOverlay()
-    
+    if(gameData.gameOverTimer.active()) {
+        createGameOverOverlay()
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

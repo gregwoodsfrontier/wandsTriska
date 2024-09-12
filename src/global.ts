@@ -2,6 +2,7 @@
 
 import { Timer, Vector2, drawRect, vec2, overlayCanvas, hsl, overlayContext, drawTextScreen, TileLayer } from "littlejsengine"
 import SpikeBall from "./spikeBall"
+import Player from "./player"
 
 // holds the game state and relevant game data
 export const gameData = {
@@ -11,8 +12,10 @@ export const gameData = {
     isGameOver: false,
     isWin: false,
     gameOverTimer: new Timer(),
-    gOverTime: 3
+    gOverTime: .9
 }
+
+export const playerGroup = [] as Player[]
 
 export const setPlayingGame = () => {
     gameData.isGameOver = false
