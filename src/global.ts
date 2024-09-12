@@ -26,10 +26,10 @@ export const setPlayingGame = () => {
     }
 }
 
-export const setGameOver = () => {
+export const setGameOver = (_isWin: boolean) => {
     gameData.isGameOver = true
     gameData.isPlaying = false
-    gameData.isWin = false
+    gameData.isWin = _isWin
     gameData.gameOverTimer.set(gameData.gOverTime)
 }
 
@@ -46,7 +46,9 @@ export const incrementTotSteps = (_totSteps: number) => {
 
 export const createGameOverOverlay = () => {
     drawRect(vec2(overlayCanvas.width/2, overlayCanvas.height/2), vec2(500, 300), hsl(0, 0, 0.5, 1), 0, false, true, overlayContext)
-    drawTextScreen('YOU WIN !!!', vec2(overlayCanvas.width/2, overlayCanvas.height/2), 40, hsl(0, 0, 1, 1), 3, hsl(0, 0, 0, 1), 'center', '12px arial' ,overlayContext)
+    
+    const overlayText = gameData.isWin? 'YOU WIN !!!': 'TRY AGAIN!!!'
+    drawTextScreen(overlayText, vec2(overlayCanvas.width/2, overlayCanvas.height/2), 40, hsl(0, 0, 1, 1), 3, hsl(0, 0, 0, 1), 'center', '12px arial' ,overlayContext)
 }
 
 export const drawGameText = (_context: CanvasRenderingContext2D, text: string, x: number, y: number, size=40) => {

@@ -1,5 +1,5 @@
 import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT, randInt } from "littlejsengine";
-import { gameData, incrementTotSteps, spawnSpikeBall, TILEMAP_LOOKUP } from "./global";
+import { gameData, incrementTotSteps, setGameOver, spawnSpikeBall, TILEMAP_LOOKUP } from "./global";
 import { SE } from "./effects";
 import FT from "./flamethrower";
 import { destroyTile } from "./level";
@@ -210,6 +210,10 @@ export default class Player extends EngineObject {
         if(tileData === TILEMAP_LOOKUP.KEY) {
             this.setKeyState(true)
             destroyTile(pos, new Timer())
+        } else if (tileData === TILEMAP_LOOKUP.DOOR) {
+            if(!this.hasKey) return true
+            this.setKeyState(false)
+            setGameOver(true)
         }
         return true
     }

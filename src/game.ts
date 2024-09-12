@@ -57,13 +57,6 @@ function gameUpdate()
         clamp(cameraScale * (1-mouseWheel*0.1), 1, 1e3)
     )
 
-    // test function
-    if(import.meta.env.DEV) {
-        if(keyWasPressed("KeyY")) {
-            setGameOver()
-        }
-    }
-
     if(gameData.gameOverTimer.elapsed()) {
         gameInit()
     }
