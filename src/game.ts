@@ -10,11 +10,12 @@ import {
     cameraScale,
     mouseWheel,
     setCameraPos,
-    engineObjects} from 'littlejsengine'
+    engineObjects,
+    keyWasPressed} from 'littlejsengine'
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import Sky from './sky';
-import { gameData, drawGameText } from './global';
+import { gameData, drawGameText, setGameOver, setPlayingGame } from './global';
 
 function initParams() {
     // init game
@@ -22,14 +23,16 @@ function initParams() {
     gameData.totalSteps = 0
     setGravity(-.01)
     setObjectDefaultAngleDamping(.99)
-    setObjectDefaultDamping(.99)
-    setCameraScale(64)
+    setObjectDefaultDamping(.75)
+    setCameraScale(32)
+    setPlayingGame()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit()
 {
     initParams()
+    
     loadLevel(data)
 
     // create sky
@@ -48,6 +51,13 @@ function gameUpdate()
     setCameraScale(
         clamp(cameraScale * (1-mouseWheel*0.1), 1, 1e3)
     )
+
+    // test function
+    if(import.meta.env.DEV) {
+        if(keyWasPressed("KeyY")) {
+            setGameOver()
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

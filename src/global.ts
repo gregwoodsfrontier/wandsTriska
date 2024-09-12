@@ -8,9 +8,26 @@ export const gameData = {
     numOfSpikeBalls: 0,
     totalSteps: 0,
     isPlaying: true,
-    isGameOver: true,
+    isGameOver: false,
     isWin: false,
-    gameOverTimer: new Timer()
+    gameOverTimer: new Timer(),
+    gOverTime: 3
+}
+
+export const setPlayingGame = () => {
+    gameData.isGameOver = false
+    gameData.isPlaying = true
+    gameData.isWin = false
+    if(gameData.gameOverTimer.isSet()) {
+        gameData.gameOverTimer.unset()
+    }
+}
+
+export const setGameOver = () => {
+    gameData.isGameOver = true
+    gameData.isPlaying = false
+    gameData.isWin = false
+    gameData.gameOverTimer.set(gameData.gOverTime)
 }
 
 export const spawnSpikeBall = (_pos: Vector2) => {
