@@ -1,4 +1,4 @@
-import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT, drawTile, tile, overlayContext } from "littlejsengine";
+import { EngineObject, TileInfo, Vector2, vec2, clamp, isUsingGamepad, gamepadStick, keyIsDown, Timer, sign, gamepadIsDown, getTileCollisionData, ASSERT } from "littlejsengine";
 import { gameData, incrementTotSteps, spawnSpikeBall, TILEMAP_LOOKUP } from "./global";
 import { SE } from "./effects";
 import FT from "./flamethrower";
@@ -50,6 +50,7 @@ export default class Player extends EngineObject {
         this.sBInEffect = new Timer()
         this.sBCDPeriod = 0.8
         this.sBCount = 1
+        this.sBCurr = this.sBCount
     }
 
     ft: FT
@@ -70,6 +71,7 @@ export default class Player extends EngineObject {
     sBCDPeriod: number // in seconds
     sBInEffect: Timer
     sBCount: number
+    sBCurr: number
 
 
     get getCountTile() {
@@ -92,7 +94,6 @@ export default class Player extends EngineObject {
             } else {
                 this.countTile++
                 gameData.totalSteps = incrementTotSteps(gameData.totalSteps)
-                console.log(gameData.totalSteps)
             }
             this.countTileCooldown.set(0.5)
         }
@@ -100,20 +101,8 @@ export default class Player extends EngineObject {
     }
 
     trigger() {
-        // set the effect timer with no countdown
+        // set the effect timer with no countdown to trigger the cont spawn of spikeballs
         this.sBInEffect.set()
-
-        // run within set amount of time
-        for(let j = this.sBCount ; j > 0; j--) {
-            console.log('read')
-            if(!this.sBCoolDown.active()) {
-               this.findSpikeBallSpawnPos()
-               this.sBCoolDown.set(this.sBCDPeriod) 
-            }
-        }
-
-        this.sBInEffect.unset()
-        this.sBCoolDown.unset()
     }
 
     findSpikeBallSpawnPos() {
@@ -172,9 +161,19 @@ export default class Player extends EngineObject {
         this.velocity = playerMoveSys(this.moveInput, this.velocity, this.maxSpeed, this.mirror)
         this.mirror = mirrorHandling(this.moveInput, this.mirror)
 
-        // if(this.pos.y < (tileCollisionSize.y - 3)) {
-        //     this.destroy()
-        // }
+        if(this.sBInEffect.isSet()) {
+            if(!this.sBCoolDown.active() && this.sBCurr > 0) {
+                this.findSpikeBallSpawnPos()
+                this.sBCoolDown.set(this.sBCDPeriod)
+                this.sBCurr = clamp(this.sBCurr-1, 0, this.sBCurr)
+            } else if(this.sBCurr === 0) {
+                // reset the params
+                this.sBCount = clamp(this.sBCount+1, this.sBCount, 3)
+                this.sBCurr = this.sBCount
+                this.sBInEffect.unset()
+                this.sBCoolDown.unset()
+            }
+        }
     }
     
     collideWithTile(tileData: number, pos: Vector2): boolean {

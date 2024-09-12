@@ -10,14 +10,7 @@ import {
     cameraScale,
     mouseWheel,
     setCameraPos,
-    engineObjects,
-    Vector2,
-    vec2,
-    Timer,
-    drawRect,
-    hsl,
-    drawTextScreen
-} from 'littlejsengine'
+    engineObjects} from 'littlejsengine'
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import Sky from './sky';
