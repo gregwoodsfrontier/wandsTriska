@@ -38,7 +38,16 @@ It is also pretty easy for me to add more elements like fireballs towards the pl
 spikes that would appear near proximity of the player, 
 or even or homing aim where the Trica can get shot by it (and potentially hurt enemies)
 
-## Review
+### Struggle bus
+
+LittleJS is a new engine to me and I have heard a lot of wonderful things about it. I did my first js13k game (DEATH) using Kontra and I want to give this a try.
+So I started reading its example code to understand how to use this engine. I quickly learnt that reading JS code is not fun. :frowning: :frowning:
+A lot of props and variables just happen out of thin air without initialization on the same file and I had a hard time tracing it.
+I am also a noob in compression, optimisation stuff so I thought I could just go with a LittleJS template and be fine with it.
+It took me a week to realise there is no tree-shakable function in those templates.
+I immediately went to Vite and embrace Typescript and also the js13k-vite-plugins. Kudos to (Mr. Cody Ebberson)[https://github.com/codyebberson] for such an amazing plugin. :tophat: :tophat: :tophat:
+
+### Review
 
 The end product turns out to be a single room that Trica is at the top and he has to keep moving to spawn spikeballs that break blocks.
 The goal is located at the end of the room, the bottom level, so he has to keep breaking blocks to reach. 
