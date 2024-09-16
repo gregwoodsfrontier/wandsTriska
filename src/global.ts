@@ -3,6 +3,7 @@
 import { Timer, Vector2, drawRect, vec2, overlayCanvas, hsl, overlayContext, drawTextScreen, TileLayer, randSign, tile } from "littlejsengine"
 import SpikeBall from "./spikeBall"
 import Player from "./player"
+import { addTile, setTileData } from "./level"
 
 // holds the game state and relevant game data
 export const gameData = {
@@ -13,7 +14,8 @@ export const gameData = {
     isWin: false,
     gameOverTimer: new Timer(),
     gOverTime: .9,
-    playerStartPos: vec2()
+    playerStartPos: vec2(),
+    keyPos: vec2()
 }
 
 export const playerGroup = [] as Player[]
@@ -36,6 +38,10 @@ export const setGameOver = (_isWin: boolean) => {
 
 export const createPlayer = (_pos: Vector2) => {
     return new Player(_pos, vec2(0.6, 0.8), tile(TILEMAP_LOOKUP.WIZARD-1))
+}
+
+export const createKey = (_pos: Vector2) => {
+    addTile(_pos, TILEMAP_LOOKUP.KEY)
 }
 
 export const spawnSpikeBall = (_pos: Vector2) => {

@@ -15,7 +15,7 @@ import {
 import { loadLevel } from './level';
 import { data } from './tileLayerData';
 import Sky from './sky';
-import { gameData, drawGameText, setPlayingGame, createGameOverOverlay, tileData2, tileLayers, playerGroup, createPlayer } from './global';
+import { gameData, drawGameText, setPlayingGame, createGameOverOverlay, tileData2, tileLayers, playerGroup, createPlayer, createKey } from './global';
 
 function initParams() {
     // init game
@@ -54,6 +54,8 @@ function gameUpdate()
         if(playerGroup[0].deathTimer.elapsed()) {
             playerGroup.length = 0
             playerGroup.push(createPlayer(gameData.playerStartPos))
+            createKey(gameData.keyPos)
+            // tileLayers[0].redraw()
             setCameraPos(playerGroup[0].pos)
             playerGroup[0].setStartGameParams()
         }

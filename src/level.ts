@@ -24,6 +24,9 @@ export const loadLevel = (_data: (number|undefined)[], _tileLayers: TileLayer[] 
             const posT = vec2(x, levelSize.y-1-y);
             const tileNum = _data[y*levelSize.x + x];
             if(!tileNum) continue
+            if(tileNum == TILEMAP_LOOKUP.KEY) {
+                gameData.keyPos = posT
+            }
             if(tileNum == TILEMAP_LOOKUP.WIZARD) {
                 gameData.playerStartPos = posT.add(vec2(0,1))
                 const p = createPlayer(gameData.playerStartPos)
