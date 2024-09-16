@@ -33,3 +33,15 @@ When the theme pops up, there are several ideas that come to my head.
 
 There are like several ideas but all of them are my first time to try the genre and they are potentially very hard for me to start. 
 The first idea seems pretty easy to implement so I went with this idea instead.
+
+It is also pretty easy for me to add more elements like fireballs towards the player, 
+spikes that would appear near proximity of the player, 
+or even or homing aim where the Trica can get shot by it (and potentially hurt enemies)
+
+## Review
+
+The end product turns out to be a single room that Trica is at the top and he has to keep moving to spawn spikeballs that break blocks.
+The goal is located at the end of the room, the bottom level, so he has to keep breaking blocks to reach. 
+I also added a shooter so that Trica can push the spikeballs with his magic instead. 
+But I realised that this game has to be movement-heavy because the mechanics are driven based on movements, or else nothing happens.
+Within a lock room, there is not much to move about and I did not include any traps or movables in this build. There is not much time left for my submission.
